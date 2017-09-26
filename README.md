@@ -17,6 +17,8 @@ Directories:
 │           ├── LabelsFiller.java
 │           ├── Labels.java
 │           ├── Minesweeper.java
+│           ├── Solver.java
+│           ├── PlayGround.java
 ```
 
 Where res/labels.csv contains the labels for the gui.
