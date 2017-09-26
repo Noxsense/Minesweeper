@@ -5,7 +5,7 @@ Build the files like any Java project.
 
 
 Directories:
-
+```
 .
 ├── res
 │   └── labels.csv
@@ -17,6 +17,6 @@ Directories:
 │           ├── LabelsFiller.java
 │           ├── Labels.java
 │           ├── Minesweeper.java
-
+```
 
 Where res/labels.csv contains the labels for the gui.
