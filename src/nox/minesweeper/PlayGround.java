@@ -13,6 +13,10 @@ public class PlayGround
 	{
 		System.out.println("==========================\nCustomized Game Field.\n");
 
+		Field field;
+		int[] indices;
+		int   lim = 0; // maximal loop restart.
+
 		field = new Field(8,3);
 		field.setDisplay0('~');
 		field.setDisplayClosed('.');
@@ -72,7 +76,7 @@ public class PlayGround
 
 		while (indices.length < 4) // get a useable game.
 		{
-			field.fillRandomly(f[2], (except = Solver.random(field)));
+			field.fillRandomly(f[2], (except = Solver.random(field.size())));
 			field.open(except);
 			indices = field.getWithState(Field.State.OPEN,0);
 			
