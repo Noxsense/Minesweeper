@@ -3,11 +3,10 @@
 Small Minesweeper Project with GUI and a Solver (wip).
 
 ## Screenshots
-![Screenshot: Home view](screenshots/SCR-20170929_235948--First_Home.png)
-![Screenshot: Select Running Game](screenshots/SCR-20170930_000414--Select_Running_Game.png)
-![Screenshot: Game](screenshots/SCR-20170930_000402--Mark_Bigger_Field.png)
-![Screenshot: Small Game](screenshots/SCR-20170930_000549--Lost_Marked_Field.png)
-![Screenshot: Statisitcs](screenshots/SCR-20170930_000742--Statistics.png)
+![Screenshot: Home view](screenshots/Home.png)
+![Screenshot: Select Running Game](screenshots/Create_Or_Select.png)
+![Screenshot: Game](screenshots/Current_Game.png)
+![Screenshot: Statisitcs](screenshots/Statistics.png)
 
 
 ## Directories:
