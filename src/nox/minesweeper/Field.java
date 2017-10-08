@@ -354,14 +354,45 @@ public class Field
 
 
 	/**
+	 * Get the index for the certain row/column comination.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return index for position with on given row and column.
+	 */
+	protected int indexOf(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		if (row<0 || this.getHeight()<=row)
+			throw new ArrayIndexOutOfBoundsException("Invalid row");
+
+		if (col<0 || this.getWidth()<=col)
+			throw new ArrayIndexOutOfBoundsException("Invalid column");
+
+		int index = row*this.getWidth()+col; 
+		return index;
+	}
+
+
+	/**
+	 * Get the Position of a certain position.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @throws ArrayIndexOutOfBoundsException if the index is out of range
+	 * @return 
+	 */
+	private Position get(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.get(this.indexOf(row,col));
+	}
+
+
+	/**
 	 * Get the Position of a certain index.
 	 * If out of boundary throw an error.
 	 * @param  index to get.
 	 * @throws ArrayIndexOutOfBoundsException if the index is out of range
 	 * @return 
 	 */
-	private Position get(int index)
-	throws ArrayIndexOutOfBoundsException
+	private Position get(int index) throws ArrayIndexOutOfBoundsException
 	{
 		if (index<0 || this.size()<=index) // not in field.
 		{
@@ -379,11 +410,22 @@ public class Field
 
 	/**
 	 * Toggles the mark of the given position.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return true, if position is marked now.
+	 */
+	public boolean toggleMark(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.toggleMark(this.indexOf(row,col));
+	}
+
+
+	/**
+	 * Toggles the mark of the given position.
 	 * @param p Position to open.
 	 * @return true, if position is marked now.
 	 */
-	public boolean toggleMark(int index)
-	throws ArrayIndexOutOfBoundsException
+	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
 	{
 		if (this.isLost() || this.isWon()) // no updates
 		{
@@ -430,12 +472,25 @@ public class Field
 
 
 	/**
+	 * Oopen given position and maybe it's zero neighbours.
+	 * Proxy for open(intex).
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return array of newky opened positons.
+	 * @throws ArrayIndexOutOfBoundsException if calculated index is not in boundaries.
+	 */
+	public int[] open(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.open(this.indexOf(row,col));
+	}
+
+
+	/**
 	 * Opens given Position and maybe it's zero-neighbours.
 	 * @param p Position to open.
 	 * @return array of newly opened positions (indices).
 	 */
-	public int[] open(int index)
-	throws ArrayIndexOutOfBoundsException
+	public int[] open(int index) throws ArrayIndexOutOfBoundsException
 	{
 		if (this.isLost() || this.isWon() || this.pos[index].isMarked()) // no updates
 		{
@@ -503,14 +558,39 @@ public class Field
 
 	/**
 	 * Get the state of the Position.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return State (open, closed, marked)
+	 * @throws ArrayIndexOutOfBoundsException
+	 */
+	public State getState(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.getState(this.indexOf(row,col));
+	}
+
+
+	/**
+	 * Get the state of the Position.
 	 * @param p requested Position's index.
 	 * @return State (open, closed, marked)
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	public State getState(int index)
-	throws ArrayIndexOutOfBoundsException
+	public State getState(int index) throws ArrayIndexOutOfBoundsException
 	{
 		return this.state[index];
+	}
+
+
+	/**
+	 * Get the count of the neighbouring mines for the Position.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return MAX VALUE (like a mine)  if the position is not opened yet, else the count of neighbours.
+	 * @throws ArrayIndexOutOfBoundsException
+	 */
+	public int onPosition(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.onPosition(this.indexOf(row, col));
 	}
 
 
@@ -520,8 +600,7 @@ public class Field
 	 * @return MAX VALUE (like a mine)  if the position is not opened yet, else the count of neighbours.
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	public int onPosition(int index)
-	throws ArrayIndexOutOfBoundsException
+	public int onPosition(int index) throws ArrayIndexOutOfBoundsException
 	{
 		Position p = this.pos[index];
 		if (!p.isOpen())
@@ -693,6 +772,18 @@ public class Field
 		System.arraycopy(tmp, 0, requested, 0, len);
 
 		return requested;
+	}
+
+
+	/**
+	 * Get the neighbours for a certain position.
+	 * @param row row of position.
+	 * @param col column of position.
+	 * @return i's neighbours' indices as int[].
+	 */
+	public int[] getNeighbours(int row, int col) throws ArrayIndexOutOfBoundsException
+	{
+		return this.getNeighbours(this.indexOf(row,col));
 	}
 
 
