@@ -13,7 +13,15 @@ import java.util.Set;
  */
 public class Field
 {
-	public  final static int   MIN = 1; // Field should have at least one/two position.
+	public final static int   MIN = 1; // Field should have at least one/two position.
+	public final static int   DISPLAY_ZERO   = 0;
+	public final static int   DISPLAY_CLOSED = 1;
+	public final static int   DISPLAY_MINE   = 2;
+	public final static int   DISPLAY_MARKED = 3;
+
+	public final static int   VALUE_MINE_ON_POS = Integer.MAX_VALUE;
+	public final static int   VALUE_CLOSED      = Integer.MIN_VALUE;
+	public final static int   VALUE_MARKED      = 9;
 
 	private final int  height, width;
 	private final int  hashCode;
@@ -26,10 +34,6 @@ public class Field
 	private State[]    state; // position is closed, marked or opened
 
 	private       static char[]    display; // how to display the positions.
-	private final static int       DZERO   = 0;
-	private final static int       DCLOSED = 1;
-	private final static int       DMINE   = 2;
-	private final static int       DMARKED = 3;
 
 
 	/**
@@ -75,17 +79,17 @@ public class Field
 			{
 				if (this.isMine())
 				{
-					return Field.display[Field.DMINE] +"";
+					return Field.display[Field.DISPLAY_MINE] +"";
 				}
 
 				return (this.minesCnt()<1)
-					?  Field.display[Field.DZERO] + ""
+					?  Field.display[Field.DISPLAY_ZERO] + ""
 					:  this.minesCnt()            + "";
 			}
 
 			return (this.isMarked())
-				?  Field.display[Field.DMARKED] + ""
-				:  Field.display[Field.DCLOSED] + "";
+				?  Field.display[Field.DISPLAY_MARKED] + ""
+				:  Field.display[Field.DISPLAY_CLOSED] + "";
 			
 		}
 
@@ -197,7 +201,7 @@ public class Field
 			{
 				if (this.isMine()) // this is a mine: mines in "neigbourhood" is max.
 				{
-					this.minesCnt = Integer.MAX_VALUE;
+					this.minesCnt = Field.VALUE_MINE_ON_POS;
 				}
 
 				else // this is not a mine: count neighbours.
@@ -605,7 +609,7 @@ public class Field
 		Position p = this.pos[index];
 		if (!p.isOpen())
 		{
-			return Integer.MAX_VALUE; // like a mine?
+			return (p.isMarked()) ? Field.VALUE_MARKED : Field.VALUE_CLOSED;
 		}
 		return p.minesCnt();
 	}
@@ -850,9 +854,9 @@ public class Field
 	 * Set the char which should be displayed when an open positions has no mines.
 	 * @param d new char.
 	 */
-	public void setDisplay0(char d)
+	public static void setDisplay0(char d)
 	{
-		Field.display[0] = d;
+		Field.display[DISPLAY_ZERO] = d;
 	}
 
 
@@ -860,9 +864,9 @@ public class Field
 	 * Set the char which should be displayed for a closed positions.
 	 * @param d new char.
 	 */
-	public void setDisplayClosed(char d)
+	public static void setDisplayClosed(char d)
 	{
-		Field.display[1] = d;
+		Field.display[DISPLAY_CLOSED] = d;
 	}
 
 
@@ -870,9 +874,9 @@ public class Field
 	 * Set the char which should be displayed for a position with mines.
 	 * @param d new char.
 	 */
-	public void setDisplayMine(char d)
+	public static void setDisplayMine(char d)
 	{
-		Field.display[2] = d;
+		Field.display[DISPLAY_MINE] = d;
 	}
 
 
@@ -880,9 +884,27 @@ public class Field
 	 * Set the char which should be displayed for a marked position.
 	 * @param d new char.
 	 */
-	public void setDisplayMarked(char d)
+	public static void setDisplayMarked(char d)
 	{
-		Field.display[3] = d;
+		Field.display[DISPLAY_MARKED] = d;
+	}
+
+
+	/**
+	 * Get the display for the given information.
+	 * @param info requested data which should be displayed (zero as default).
+	 * @return display as char.
+	 */
+	public static char getDisplay(int info)
+	{
+		switch(info)
+		{
+			case DISPLAY_CLOSED:
+			case DISPLAY_MINE:case DISPLAY_MARKED:
+				return Field.display[info];
+			case DISPLAY_ZERO: default:
+				return Field.display[DISPLAY_ZERO];
+		}
 	}
 
 
@@ -969,7 +991,8 @@ public class Field
 		return String.format(
 				"%d %d %d %c%c%c%c %s",
 				this.width, this.height, this.minesCnt[0],
-				display[DZERO], display[DCLOSED], display[DMINE], display[DMARKED],
+				display[DISPLAY_ZERO], display[DISPLAY_CLOSED],
+				display[DISPLAY_MINE], display[DISPLAY_MARKED],
 				s);
 	}
 }
