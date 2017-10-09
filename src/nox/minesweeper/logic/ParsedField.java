@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.logic;
 
 class ParsedField extends Field
 {

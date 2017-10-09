@@ -2,12 +2,14 @@
 PROJECT = Minesweeper
 
 # files and directories.
-MAIN    = nox.minesweeper.Minesweeper
+MAIN    = nox.minesweeper.desktop.Minesweeper
 RES     = res
 SRC     = src/nox/minesweeper
+LOGIC   = $(SRC)/logic
+DESKTOP = $(SRC)/desktop
 TMP     = /tmp/Minesweeper
 BIN     = $(TMP)/bin
-CLASSES = $(BIN)/nox/minesweeper/*.class
+CLASSES = $(BIN)/nox/minesweeper/*/*.class
 
 # tools.
 JAVAC = javac $(JTAGS) $(BTAGS)
@@ -24,6 +26,7 @@ run: $(CLASSES) $(BIN)/$(RES)
 # Build
 build: $(CLASSES)
 
+
 # Jar File
 run-jar: $(TMP)/$(PROJECT).jar $(BIN)/$(RES)
 	cd $(BIN) && java -jar $(PROJECT).jar
@@ -34,8 +37,15 @@ $(TMP)/$(PROJECT).jar: $(CLASSES)
 
 
 # Compile classes
-$(CLASSES): $(BIN) $(SRC)/*.java $(RES)/*
-	@$(JAVAC) $(SRC)/*.java
+logic: $(BIN) $(LOGIC)
+	@$(JAVAC) $(LOGIC)/*.java
+
+
+desktop: logic $(DESKTOP)
+	@$(JAVAC) $(DESKTOP)/*.java
+
+
+$(CLASSES): logic desktop
 
 
 # Create Bin directory
@@ -43,7 +53,7 @@ $(BIN):
 	@mkdir -p $(BIN)
 	
 
-$(BIN)/$(RES): $(RES)/*
+$(BIN)/$(RES): $(BIN) $(RES)/*
 	@cp -vr $(RES) $(BIN)
 
 

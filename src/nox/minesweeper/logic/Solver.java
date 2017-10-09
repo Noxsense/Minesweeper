@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.logic;
 
 import java.util.Collection;
 import java.util.ArrayList;
@@ -341,16 +341,17 @@ public enum Solver
 	 * @param string with Field information.
 	 * @return a nox.minesweeper.Field
 	 */
-	private Field parseFieldInfo(String string) throws NullPointerException
+	private Field parseFieldInfo(String string) throws NullPointerException,NullPointerException,ArrayIndexOutOfBoundsException
 	{
-		return null; // TODO (A) 2017-09-27  @implement parsing field +string.
+		//return null; // TODO (A) 2017-09-27  @implement parsing field +string.
+		return ParsedField.parseField(string);
 	}
 
 
 	/**
 	 * Print the field scoping the given Index and it's neighbours.
 	 * @param field 
-	 * @param i 
+	 * @param index
 	 * @param level
 	 * @return 
 	 */

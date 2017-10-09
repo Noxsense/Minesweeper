@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.desktop;
 
 
 import java.util.Map;

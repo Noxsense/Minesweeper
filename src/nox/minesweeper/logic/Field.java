@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.logic;
 
 
 import java.util.ArrayList;

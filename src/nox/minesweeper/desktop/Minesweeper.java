@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.desktop;
 
 
 import java.awt.BorderLayout;
@@ -34,6 +34,8 @@ import javax.swing.ListModel;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import nox.minesweeper.logic.Field;
 
 
 /**

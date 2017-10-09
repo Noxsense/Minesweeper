@@ -1,4 +1,4 @@
-package nox.minesweeper;
+package nox.minesweeper.desktop;
 
 
 import java.awt.Color;
@@ -12,6 +12,8 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.*;
+
+import nox.minesweeper.logic.Field;
 
 
 /**
