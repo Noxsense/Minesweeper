@@ -180,7 +180,9 @@ public class Field
 							ps[psLen] = p;
 							psLen++;
 						}
-						catch (ArrayIndexOutOfBoundsException|NullPointerException e)
+						catch (ArrayIndexOutOfBoundsException e)
+						{}
+						catch (NullPointerException e)
 						{}
 					}
 				}
@@ -510,8 +512,8 @@ public class Field
 			return new int[]{index};
 		}
 
-		List<Integer>  nowOpen    = new ArrayList<>();
-		List<Position> neighbours = new ArrayList<>();
+		List<Integer>  nowOpen    = new ArrayList<Integer>();
+		List<Position> neighbours = new ArrayList<Position>();
 
 		nowOpen.add(p.index);
 
@@ -519,9 +521,9 @@ public class Field
 			neighbours.add(n);
 
 		/*Given Index: Position without mines: Open unblocked neighbours.*/
+		Set<Position> newDiscovered = new HashSet<Position>();
 		while (!neighbours.isEmpty() && !this.lost)
 		{
-			Set<Position> newDiscovered = new HashSet<>();
 			for (Position n : neighbours)
 			{
 				if (n==null||n.isMarked()||n.isOpen()||nowOpen.contains(n.index))
@@ -550,6 +552,7 @@ public class Field
 			}
 			neighbours.clear(); // remove recently watched.
 			neighbours.addAll(newDiscovered);
+			newDiscovered.clear();
 		}
 
 		int[] tmp = new int[nowOpen.size()];

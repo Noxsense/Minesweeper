@@ -64,3 +64,4 @@ $(BIN)/$(LABELS): $(BIN) $(LABELS)
 # Clean
 clean: $(BIN)
 	@rm -vfr $(TMP)
+	@ant clean
