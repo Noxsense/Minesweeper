@@ -86,7 +86,7 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		try // load Strings
 		{
-			Minesweeper.ls.loadFromFile("res/labels.csv");
+			Minesweeper.ls.loadFromFile("labels.csv");
 		}
 		catch (NullPointerException e)
 		{

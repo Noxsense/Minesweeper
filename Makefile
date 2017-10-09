@@ -3,10 +3,10 @@ PROJECT = Minesweeper
 
 # files and directories.
 MAIN    = nox.minesweeper.desktop.Minesweeper
-RES     = res
 SRC     = src/nox/minesweeper
 LOGIC   = $(SRC)/logic
 DESKTOP = $(SRC)/desktop
+LABELS  = $(DESKTOP)/labels.csv
 TMP     = /tmp/Minesweeper
 BIN     = $(TMP)/bin
 CLASSES = $(BIN)/nox/minesweeper/*/*.class
@@ -19,8 +19,12 @@ JARC  = jar vcfe
 
 
 # Run
-run: $(CLASSES) $(BIN)/$(RES)
+run: $(CLASSES) $(BIN)/$(LABELS)
 	@cd $(BIN) && java $(MAIN)
+
+
+android:
+	ant debug
 
 
 # Build
@@ -28,7 +32,7 @@ build: $(CLASSES)
 
 
 # Jar File
-run-jar: $(TMP)/$(PROJECT).jar $(BIN)/$(RES)
+run-jar: $(TMP)/$(PROJECT).jar $(BIN)/$(LABELS)
 	cd $(BIN) && java -jar $(PROJECT).jar
 
 
@@ -53,8 +57,8 @@ $(BIN):
 	@mkdir -p $(BIN)
 	
 
-$(BIN)/$(RES): $(BIN) $(RES)/*
-	@cp -vr $(RES) $(BIN)
+$(BIN)/$(LABELS): $(BIN) $(LABELS)
+	@cp -vr $(LABELS) $(BIN)
 
 
 # Clean
