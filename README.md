@@ -12,25 +12,30 @@ Small Minesweeper Project with GUI and a Solver (wip).
 ## Directories:
 ```
 .
-├── res
+├── res/
 │   └── labels.csv
-├── src
-│   └── nox
-│       └── minesweeper
-│           ├── Field.java
-│           ├── GameField.java
-│           ├── LabelsFiller.java
-│           ├── Labels.java
-│           ├── Minesweeper.java
-│           ├── Solver.java
-│           ├── PlayGround.java
-├── screenshots
+├── screenshots/
+├──src/
+   └── nox
+       └── minesweeper/
+           ├── desktop/
+           │   ├── GameField.java
+           │   ├── LabelsFiller.java
+           │   ├── Labels.java
+           │   └── Minesweeper.java
+           └── logic/
+               ├── Field.java
+               ├── ParsedField.java
+               ├── PlayGround.java
+               └── Solver.java
 ```
+
 
 Where res/labels.csv contains the labels for the gui.
 
 
-## Compiling
+## Compiling Desktop GUI
+This will create class files in /tmp/Minesweeper
 In main directory run for building:
 ```
 make build
