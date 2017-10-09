@@ -343,7 +343,7 @@ public enum Solver
 	 */
 	private Field parseFieldInfo(String string) throws NullPointerException
 	{
-		return null;
+		return null; // TODO (A) 2017-09-27  @implement parsing field +string.
 	}
 
 
