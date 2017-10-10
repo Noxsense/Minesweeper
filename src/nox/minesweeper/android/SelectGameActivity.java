@@ -102,13 +102,24 @@ public class SelectGameActivity extends Activity implements OnClickListener
 			int[]      in     = this.getInputs();
 
 			Game game = master.getGameWith(in[HEIGHT],in[WIDTH],in[MINES]);
-			Toast.makeText(this, "New Game created: "+game, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Open "+game, Toast.LENGTH_LONG).show();
 			this.gamesAdapter.notifyDataSetChanged();
+			this.openGame();
 		}
 		catch (Exception e)
 		{
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+	}
+
+
+	/**
+	 * Opens the game view with the most recent game.
+	 */
+	public void openGame()
+	{
+		Intent intent = new Intent(this.getApplicationContext(), PlayActivity.class);
+		startActivity(intent);
 	}
 
 

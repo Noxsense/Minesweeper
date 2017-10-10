@@ -75,11 +75,27 @@ public class GameMaster
 	 */
 	private void add(Game game)
 	{
-		if (game==null || this.games.contains(game))
+		if (game==null)
 		{
 			return;
 		}
-		this.games.add(game);
+
+		/*Remove from previous Position to put it on top.*/
+		if (this.games.contains(game))
+		{
+			/*Find game*/
+			for (Game g : this.games)
+			{
+				if (!g.equals(game))
+					continue;
+
+				game = g;
+				break;
+			}
+			this.games.remove(game);
+		}
+
+		this.games.add(0, game);
 	}
 
 
@@ -115,30 +131,11 @@ public class GameMaster
 	 */
 	public Game getGameWith(int height, int width, int mines) throws ArrayIndexOutOfBoundsException
 	{
-		Game game = null;
-
-		/*Find exisitng game.*/
-		if (this.containsGameWith(height,width,mines))
-		{
-			/*Find game*/
-			for (Game g : this.games)
-			{
-				if (!g.equals(height,width,mines))
-					continue;
-
-				game = g;
-				break;
-			}
-		}
-
-		/*Initiate a new Game and store it.*/
-		else
-		{
-			game = new Game(height, width, mines);
-			GameMaster.this.add(game);
-		}
-
-		return game;
+		/* Put the recently called game on head.
+		 * May use an already initated game.
+		 */
+		this.add(new Game(height, width, mines));
+		return this.get(0);
 	}
 
 
@@ -147,7 +144,7 @@ public class GameMaster
 	 * @param height of field
 	 * @param width of field
 	 * @param mines in field
-	 * @return true, if there is a game store with those parameters.
+	 * @return true, if there is a game stored with those parameters.
 	 */
 	public boolean containsGameWith(int height,int width,int mines)
 	{
@@ -158,5 +155,16 @@ public class GameMaster
 			return true;
 		}
 		return false;
+	}
+
+
+	/**
+	 * Check if there is a game known like the given game.
+	 * @param game which is seached.
+	 * @return true, if there is a game stored like the given one.
+	 */
+	public boolean containsGame(Game game)
+	{
+		return game!=null && this.games.contains(game);
 	}
 }

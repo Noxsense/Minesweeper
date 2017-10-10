@@ -12,7 +12,7 @@
 
 		<activity
 			android:name="MainActivity"
-			android:label="Blabla... Minesweeper"
+			android:label="@string/app_name"
 			>
 			<!--android:label="@string/app_name"-->
 			<intent-filter>
@@ -23,6 +23,7 @@
 
 		<activity android:name="SelectGameActivity"></activity>
 		<activity android:name="StatisticsActivity"></activity>
+		<activity android:name="PlayActivity"></activity>
 
 	</application>
 

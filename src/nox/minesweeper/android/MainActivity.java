@@ -90,13 +90,19 @@ public class MainActivity extends Activity implements OnClickListener
 		{
 			Intent intent = null;
 
+			/** Opens the view to select a (new) game.*/
 			if (view.equals(selectGame))
 			{
 				intent = new Intent(this, SelectGameActivity.class);
 			}
+
+			/** Opens the game view with the most recent game.  */
 			else if (view.equals(recentGame))
 			{
+				intent = new Intent(this, PlayActivity.class);
 			}
+
+			/** Opens the statisitcs view.*/
 			else if (view.equals(statistics))
 			{
 				intent = new Intent(this, StatisiticsActivity.class);
@@ -104,7 +110,8 @@ public class MainActivity extends Activity implements OnClickListener
 
 			if (intent==null) // nothing to do.
 				return;
-			startActivity(intent);
+
+			this.startActivity(intent);
 		}
 		catch (Exception e)
 		{
