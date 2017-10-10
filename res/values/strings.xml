@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">Minesweeper</string>
+	<string name="app_name">Minesweeper</string>
+	<string name="about">Created by Nox</string>
+
+	<string name="accept">Accept</string>
+	<string name="abort">Abort</string>
+
+	<string name="new_game">Create new Game</string>
+	<string name="recent_game">Recent Game</string>
+	<string name="statistics">Statistics</string>
+
+	<string name="select_game">Select a Game</string>
+	<string name="custom_game">Create a custom Game</string>
+
 </resources>

@@ -1,67 +1,79 @@
 
 PROJECT = Minesweeper
+PACKAGE = nox/minesweeper
 
 # files and directories.
 MAIN    = nox.minesweeper.desktop.Minesweeper
-SRC     = src/nox/minesweeper
-LOGIC   = $(SRC)/logic
-DESKTOP = $(SRC)/desktop
+SRC     = src
+LOGIC   = $(SRC)/$(PACKAGE)/logic
+DESKTOP = $(SRC)/$(PACKAGE)/desktop
+ANDROID = $(SRC)/$(PACKAGE)/android
 LABELS  = $(DESKTOP)/labels.csv
-TMP     = /tmp/Minesweeper
-BIN     = $(TMP)/bin
-CLASSES = $(BIN)/nox/minesweeper/*/*.class
+BIN     = bin
+CLASSES = bin/classes
+APK     = bin/Minesweeper-debug.apk
 
 # tools.
 JAVAC = javac $(JTAGS) $(BTAGS)
-jtags = -Xdiags:verbose -Xlint:deprecation -Xlint:unchecked #-Xlint:all
-BTAGS = -d $(BIN) -cp $$CLASSPATH:$(BIN) # build tags
+JTAGS = -Xdiags:verbose -Xlint:deprecation -Xlint:unchecked #-Xlint:all
+BTAGS = -d $(CLASSES) -cp $$CLASSPATH:$(CLASSES) # build tags
 JARC  = jar vcfe
+MKDIR = mkdir -p
 
 
+#
 # Run
-run: $(CLASSES) $(BIN)/$(LABELS)
-	@cd $(BIN) && java $(MAIN)
+#
+run: desktop
+	@cd $(CLASSES) && java $(MAIN)
 
 
-android:
-	ant debug
+android-install: $(APK)
+	@adb devices && adb install -r bin/Minesweeper-debug.apk
 
 
+run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)
+	@cd $(CLASSES) && java -jar $(PROJECT).jar
+
+
+# 
+#
 # Build
-build: $(CLASSES)
+#
+android: $(APK)
+$(APK): logic $(ANDROID) res/*/* *.xml *.properties
+	@ant debug
 
 
-# Jar File
-run-jar: $(TMP)/$(PROJECT).jar $(BIN)/$(LABELS)
-	cd $(BIN) && java -jar $(PROJECT).jar
-
-
-$(TMP)/$(PROJECT).jar: $(CLASSES)
-	cd $(BIN) && $(JARC) $(BIN)/$(PROJECT).jar $(MAIN) *
-
-
-# Compile classes
-logic: $(BIN) $(LOGIC)
-	@$(JAVAC) $(LOGIC)/*.java
-
-
-desktop: logic $(DESKTOP)
+desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
+$(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/* $(DESKTOP)
 	@$(JAVAC) $(DESKTOP)/*.java
 
 
-$(CLASSES): logic desktop
+logic: $(CLASSES)/$(PACKAGE)/logic/*.class
+$(CLASSES)/$(PACKAGE)/logic/*.class: $(CLASSES) $(LOGIC)
+	@$(JAVAC) $(LOGIC)/*.java
 
 
-# Create Bin directory
-$(BIN):
-	@mkdir -p $(BIN)
+$(BIN)/$(PROJECT).jar: build
+	@cd $(CLASSES) && $(JARC) $(PROJECT).jar $(MAIN) *
+
+
+#
+# Extras
+#
+$(BIN): $(CLASSES)
+
+$(CLASSES):
+	@$(MKDIR) $(CLASSES)
 	
 
-$(BIN)/$(LABELS): $(BIN) $(LABELS)
-	@cp -vr $(LABELS) $(BIN)
+$(CLASSES)/$(LABELS): $(CLASSES) $(LABELS)
+	@cp -vr $(LABELS) $(CLASSES)
 
 
+#
 # Clean
+#
 clean: $(BIN)
-	@rm -vfr $(TMP)
 	@ant clean
