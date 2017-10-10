@@ -46,7 +46,7 @@ $(APK): logic $(ANDROID) res/*/* *.xml *.properties
 
 
 desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
-$(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/* $(DESKTOP)
+$(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(DESKTOP)
 	@$(JAVAC) $(DESKTOP)/*.java
 
 
