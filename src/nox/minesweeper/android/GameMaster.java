@@ -63,17 +63,39 @@ public class GameMaster
 
 		for (Game g : this.games)
 		{
-			s += g+"\n";
+			s += g.printAll()+"\n";
 		}
 		return s.trim();
 	}
 
 
 	/**
+	 * Try to load the game into the GameMaster store.
+	 * @param info with game data.
+	 * @throws NullPointerException 
+	 * @throws ArrayIndexOutOfBoundsException 
+	 * @throws NumberFormatException 
+	 */
+	public void loadGame(String info) throws NullPointerException, ArrayIndexOutOfBoundsException, NumberFormatException
+	{
+		try
+		{
+		Game parsed = Game.parseGame(info);
+		this.add(parsed, false);
+		}
+		catch (NumberFormatException e)
+		{
+			throw new NumberFormatException(e.getMessage()+": \""+info+"\"");
+		}
+	}
+
+
+	/**
 	 * Add a new Game into the store.
 	 * @param game new Game to remember.
+	 * @param asHead if true, set the game as head, else append.
 	 */
-	private void add(Game game)
+	private void add(Game game, boolean asHead)
 	{
 		if (game==null)
 		{
@@ -95,7 +117,18 @@ public class GameMaster
 			this.games.remove(game);
 		}
 
-		this.games.add(0, game);
+		if (asHead) this.games.add(0, game);
+		else        this.games.add(game);
+	}
+
+
+	/**
+	 * Add a new Game into the store.
+	 * @param game new Game to remember.
+	 */
+	private void add(Game game)
+	{
+		this.add(game, true);
 	}
 
 

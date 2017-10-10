@@ -204,11 +204,18 @@ class Statistic implements Parcelable
 	{
 		String[] values = info.split("\\s+");
 
-		this.gamesWon    = Integer.parseInt(values[0]);
-		this.gamesLost   = Integer.parseInt(values[1]);
-		this.streak      = Integer.parseInt(values[2]);
-		this.timeAverage = Long.parseLong(values[3]);
-		this.timeBest    = Long.parseLong(values[4]);
+		try
+		{
+			this.gamesWon    = Integer.parseInt(values[0].trim());
+			this.gamesLost   = Integer.parseInt(values[1].trim());
+			this.streak      = Integer.parseInt(values[2].trim());
+			this.timeAverage = Long.parseLong(values[3].trim());
+			this.timeBest    = Long.parseLong(values[4].trim());
+		}
+		catch (NumberFormatException e)
+		{
+			throw new NumberFormatException("Statistic::parseValues() <= "+e.getMessage());
+		}
 	}
 
 

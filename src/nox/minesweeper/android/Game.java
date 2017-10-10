@@ -12,11 +12,15 @@ import nox.minesweeper.logic.Field;
  */
 class Game implements Parcelable
 {
+	private final static String SEP0 = "!";
+	private final static String SEP1 = ",";
+
 	public final Field field;
 	public final int   mines;
 
 	private long       time;
 	private Statistic  stats;
+	private int        opened;
 
 	/**
 	 * Initate a new Game with the given attributes.
@@ -34,6 +38,9 @@ class Game implements Parcelable
 
 		this.mines = mines;
 		this.stats = new Statistic(this);
+
+		this.opened = 0;
+		this.time   = 0;
 	}
 
 
@@ -77,6 +84,7 @@ class Game implements Parcelable
 
 	/**
 	 * Recreate the Game from the String.
+	 * Format: height|width|mines|mines|opened|marked|stats
 	 * @param str String with information about the Game.
 	 * @return game with parsed attribtues
 	 * @throws NullPointerException if the string is null.
@@ -86,7 +94,7 @@ class Game implements Parcelable
 	protected static Game parseGame(String string) throws NullPointerException, NumberFormatException, ArrayIndexOutOfBoundsException
 	{
 		String[] str, indices;
-		str = string.split("\\s+", 7);
+		str = string.split(SEP0, 7);
 
 		int height = Integer.parseInt(str[0]);
 		int width  = Integer.parseInt(str[1]);
@@ -94,28 +102,40 @@ class Game implements Parcelable
 
 		Game parsed = new Game(height, width, mines);
 
-		indices  = str[3].split(","); // mine
-		int[] is = new int[indices.length];
-		for (int i=0; i<is.length; i++)
+		/*Section for known mines.*/
+		if (0<str[3].length())
 		{
-			is[i] = Integer.parseInt(indices[i]);
-		}
-		parsed.field.fillMines(is);
-
-		indices = str[4].split(","); // open
-		for (String indexS : indices)
-		{
-			parsed.field.open(Integer.parseInt(indexS));
+			indices  = str[3].split(SEP1); // mine
+			int[] is = new int[indices.length];
+			for (int i=0; i<is.length; i++)
+			{
+				is[i] = Integer.parseInt(indices[i]);
+			}
+			parsed.field.fillMines(is);
 		}
 
-		indices = str[5].split(","); // marked
-		for (String indexS : indices)
+		/*Section for opened mines.*/
+		if (0<str[4].length())
 		{
-			parsed.field.toggleMark(Integer.parseInt(indexS));
+			indices = str[4].split(SEP1); // open
+			for (String indexS : indices)
+			{
+				parsed.open(Integer.parseInt(indexS));
+			}
+		}
+
+		/*Section for marked mines.*/
+		if (0<str[5].length())
+		{
+			indices = str[5].split(SEP1); // marked
+			for (String indexS : indices)
+			{
+				parsed.toggleMark(Integer.parseInt(indexS));
+			}
 		}
 
 		/*Statistics*/
-		parsed.stats.parseValues(str[6].replaceAll(",", " "));
+		parsed.stats.parseValues(str[6].replaceAll(SEP1, " "));
 
 		return parsed;
 	}
@@ -123,15 +143,16 @@ class Game implements Parcelable
 
 	/**
 	 * Get a String representation of the current state.
+	 * Format: height|width|mines|mines|opened|marked|stats
 	 * @return this game with all mines, marks and open as String.
 	 */
 	protected String printAll()
 	{
 		/*Base information.*/
-		String s;
-		s  = this.field.getHeight()+" "+this.field.getWidth()+" "+this.mines;
-		s += " ";
-
+		String s = String.format("%d"+SEP0+"%d"+SEP0+"%d"+SEP0
+				,this.field.getHeight()
+				,this.field.getWidth()
+				,this.mines);
 
 		/*Position information.*/
 		int[] indices;
@@ -139,26 +160,26 @@ class Game implements Parcelable
 		indices = this.field.getMineIndices(); // mines
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? "," : "");
+			s += i+ ((i<indices.length-1) ? SEP1 : "");
 		}
-		s += " ";
+		s += SEP0;
 
 		indices = this.field.getWithState(Field.State.OPEN, 0); // opened
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? "," : "");
+			s += i+ ((i<indices.length-1) ? SEP1 : "");
 		}
-		s += " ";
+		s += SEP0;
 
 		indices = this.field.getWithState(Field.State.MARKED, 0); // marked
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? "," : "");
+			s += i+ ((i<indices.length-1) ? SEP1 : "");
 		}
-		s += " ";
+		s += SEP0;
 
 		/*Statistics*/
-		s += this.stats.toString().replaceAll("\\s+",",");
+		s += this.stats.toString().replaceAll("\\s+",SEP1);
 
 		return s;
 	}
@@ -176,6 +197,49 @@ class Game implements Parcelable
 
 
 	/**
+	 * Get the count of opened and marked mines.
+	 * @return count as int.
+	 */
+	public int discovered()
+	{
+		return this.opened + this.field.getMarked();
+	}
+
+
+	/**
+	 * Proxy and handler for this.field.open(index).
+	 * @param index  which should be opened.
+	 * @return newly opened indices.
+	 * @throws ArrayIndexOutOfBoundsException 
+	 */
+	public int[] open(int index) throws ArrayIndexOutOfBoundsException
+	{
+		/*Fill field except just clicked index.*/
+		if (this.field.getMines() < this.mines)
+		{
+			this.field.fillRandomly(this.mines, index);
+		}
+
+		int[] indices = this.field.open(index);
+		this.opened   = this.field.getWithState(Field.State.OPEN, 0).length;
+
+		return indices;
+	}
+
+
+	/**
+	 * Shortcut for this.field.toggleMark(index).
+	 * @param index index which should be marked (or not).
+	 * @return true, if the index is marked, false if just closed.
+	 * @throws ArrayIndexOutOfBoundsException 
+	 */
+	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
+	{
+		return this.field.toggleMark(index);
+	}
+
+
+	/**
 	 * Get the statistics for this game.
 	 * @return stats as Statistic, where changes have no effect on this stats.
 	 */
@@ -188,9 +252,10 @@ class Game implements Parcelable
 	@Override
 	public String toString()
 	{
-		return "Game" + " "+ this.field.getHeight() + ":"+ this.field.getWidth()
-			+ " with "+ this.mines
-			;
+		return String.format("Game %d:%d with %d mines"
+				,this.field.getHeight()
+				,this.field.getWidth()
+				,this.mines);
 	}
 
 
