@@ -693,11 +693,12 @@ public class Field
 
 	/**
 	 * Fill this field with mines.
+	 * This will clear the current state and set the given indeces as mines.
 	 * @param mineIndices positions for mines.
 	 * @throws ArrayIndexOutOfBoundsException 
 	 * @throws NullPointerException 
 	 */
-	protected void fillMines(int[] mineIndices) throws ArrayIndexOutOfBoundsException, NullPointerException
+	public void fillMines(int[] mineIndices) throws ArrayIndexOutOfBoundsException, NullPointerException
 	{
 		this.clear();
 
@@ -745,6 +746,34 @@ public class Field
 	public int getMines()
 	{
 		return this.minesCnt[0];
+	}
+
+
+	/**
+	 * Get the indices where mines are placed.
+	 * @return indices as int[]
+	 */
+	public int[] getMineIndices()
+	{
+		int     len;
+		int[]   tmp, requested;
+
+		tmp = new int[this.size()];
+		len = 0;
+
+		for (int i=0; i<this.size(); i++)
+		{
+			if (!this.pos[i].isMine())
+				continue;
+
+			tmp[len] = i;
+			len++;
+		}
+
+		requested = new int[len];
+		System.arraycopy(tmp, 0, requested, 0, len);
+
+		return requested;
 	}
 
 
