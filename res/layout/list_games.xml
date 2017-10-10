@@ -6,20 +6,19 @@
 	android:layout_height="fill_parent"
 	>
 	<TextView
+		android:id="@+id/title"
 		android:gravity="center"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:text="@string/select_game"
 		/>
 	<Button
-		android:id="@+id/btn_custom_game"
+		android:id="@+id/button"
 		android:gravity="center"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:text="@string/custom_game"
 		/>
 	<ListView
-		android:id="@+id/list_games"
+		android:id="@+id/list"
 		android:layout_height="0dp"
 		android:layout_weight="1"
 		android:layout_width="fill_parent"

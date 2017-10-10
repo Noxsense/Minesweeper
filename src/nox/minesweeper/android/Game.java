@@ -175,6 +175,16 @@ class Game implements Parcelable
 	}
 
 
+	/**
+	 * Get the statistics for this game.
+	 * @return stats as Statistic, where changes have no effect on this stats.
+	 */
+	public Statistic getStatistics()
+	{
+		return new Statistic(this.stats);
+	}
+
+
 	@Override
 	public String toString()
 	{

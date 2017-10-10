@@ -53,6 +53,8 @@ public class MainActivity extends Activity implements OnClickListener
 		{
 			this.findButtons();
 		}
+
+		master.getGameWith(9,9,10);
 	}
 
 
@@ -91,6 +93,13 @@ public class MainActivity extends Activity implements OnClickListener
 			if (view.equals(selectGame))
 			{
 				intent = new Intent(this, SelectGameActivity.class);
+			}
+			else if (view.equals(recentGame))
+			{
+			}
+			else if (view.equals(statistics))
+			{
+				intent = new Intent(this, StatisiticsActivity.class);
 			}
 
 			if (intent==null) // nothing to do.

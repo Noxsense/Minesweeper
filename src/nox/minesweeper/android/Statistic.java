@@ -11,6 +11,10 @@ import nox.minesweeper.logic.Field;
  */
 class Statistic implements Parcelable
 {
+	public final static int BEST_TIME     = 0;
+	public final static int AVERAGE_TIME  = 1;
+	public final static int CELL_TIME     = 2;
+
 	private int  gameHeight, gameWidth, gameMines;
 
 	private int  gamesWon;
@@ -144,6 +148,28 @@ class Statistic implements Parcelable
 	{
 		this.gamesLost += 1;
 		this.streak     = 0;
+	}
+
+
+	/**
+	 * Get the requested time in milli seconds.
+	 * @param which type of time.
+	 * @return time in milli seconds as long.
+	 */
+	public long getTime(int which)
+	{
+		if (this.gamesWon<1)
+		{
+			return -1;
+		}
+
+		switch(which)
+		{
+			case BEST_TIME: return this.timeBest;
+			case CELL_TIME: return this.timePerCell;
+			case AVERAGE_TIME: return this.timeAverage;
+			default: return -1;
+		}
 	}
 
 
