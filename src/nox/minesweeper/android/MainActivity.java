@@ -77,11 +77,29 @@ public class MainActivity extends Activity implements OnClickListener
 		super.onPause();
 		
 		/*Save game stati.*/
+		String info = master.printAllGames();
 	}
 
 
 	@Override
 	public void onClick(View view)
 	{
+		try
+		{
+			Intent intent = null;
+
+			if (view.equals(selectGame))
+			{
+				intent = new Intent(this, SelectGameActivity.class);
+			}
+
+			if (intent==null) // nothing to do.
+				return;
+			startActivity(intent);
+		}
+		catch (Exception e)
+		{
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+		}
 	}
 }
