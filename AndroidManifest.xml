@@ -22,7 +22,7 @@
 		</activity>
 
 		<activity android:name="SelectGameActivity"></activity>
-		<activity android:name="StatisiticsActivity"></activity>
+		<activity android:name="StatisticsActivity"></activity>
 
 	</application>
 

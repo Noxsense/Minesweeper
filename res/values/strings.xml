@@ -4,7 +4,7 @@
 	<string name="about">Created by Nox</string>
 
 	<string name="accept">Accept</string>
-	<string name="abort">Abort</string>
+	<string name="cancel">Abort</string>
 
 	<string name="new_game">Create new Game</string>
 	<string name="recent_game">Recent Game</string>

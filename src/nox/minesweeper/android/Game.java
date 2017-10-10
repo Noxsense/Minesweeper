@@ -188,12 +188,16 @@ class Game implements Parcelable
 	@Override
 	public String toString()
 	{
-		return "Game"
-			+ " "+ this.field.getHeight()
-			+ " "+ this.field.getWidth()
-			+ " "+ this.mines
-			+ (this.isRunning()?" Running":"")
+		return "Game" + " "+ this.field.getHeight() + ":"+ this.field.getWidth()
+			+ " with "+ this.mines
 			;
+	}
+
+
+	@Override
+	public int hashCode()
+	{
+		return (this.getClass().getName()+this.toString()).hashCode();
 	}
 
 

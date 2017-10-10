@@ -113,7 +113,7 @@ public class GameMaster
 	 * @param mines 
 	 * @return Game with requested attributes.
 	 */
-	public Game getGameWith(int height, int width, int mines)
+	public Game getGameWith(int height, int width, int mines) throws ArrayIndexOutOfBoundsException
 	{
 		Game game = null;
 

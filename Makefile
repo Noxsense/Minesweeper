@@ -29,7 +29,7 @@ run: desktop
 
 
 android-install: $(APK)
-	@adb devices && adb install -r bin/Minesweeper-debug.apk
+	@adb devices && adb install -r $(APK)
 
 
 run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)

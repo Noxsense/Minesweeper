@@ -12,7 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
-public class StatisiticsActivity extends Activity
+public class StatisticsActivity extends Activity
 {
 	private TextView      titleView;
 	private ListView      statsView;
@@ -31,19 +31,21 @@ public class StatisiticsActivity extends Activity
 			{
 				if (stats==null) return "";
 
-				boolean wonGames = stats.countGamesWon(true)>0;
+				boolean wonGames = 0<stats.countGamesWon(true);
 
-				String str;
-				str = "Games Won:        "+stats.countGamesWon(true) +"\n"
-					+ "Games Lost:       "+stats.countGamesWon(false);
+				String str = "";
+
+				str += String.format("%18s %d\n%18s %d"
+					, "Games won:",  stats.countGamesWon(true)
+					, "Games Lost:", stats.countGamesWon(false));
 
 				if (!wonGames) return str;
 				
-				str = "\n"
-					+ "Average Time:     "+print(stats.getTime(Statistic.AVERAGE_TIME))+"\n"
-					+ "Best Time:        "+print(stats.getTime(Statistic.BEST_TIME))+"\n"
-					+ "Seconds per Cell: "+print(stats.getTime(Statistic.CELL_TIME))
-					;
+				str += String.format("\n"+"%18s %s\n"+"%18s %s\n"+"%18s %s"
+				,"Average Time:",    print(stats.getTime(Statistic.AVERAGE_TIME))
+				,"Best Time:",       print(stats.getTime(Statistic.BEST_TIME))
+				,"Seconds per Cell:",print(stats.getTime(Statistic.CELL_TIME))
+				);
 
 				return str;
 			}
@@ -68,7 +70,7 @@ public class StatisiticsActivity extends Activity
 				stats = game.getStatistics();
 
 				tView = (TextView) convertView.findViewById(R.id.text0);
-				tView.setText("Statistic: "+game);
+				tView.setText(String.valueOf(game));
 				tView.setGravity(Gravity.LEFT);
 
 				tView = (TextView) convertView.findViewById(R.id.text1);

@@ -11,22 +11,28 @@
 		android:layout_width="fill_parent"
 		android:text="@string/custom_game"
 		/>
-	<EditView
+	<SeekBar
+		android:gravity="center"
 		android:id="@+id/in_game_height"
-		android:gravity="center"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
+		android:max="99"
+		android:progress="8"
 		/>
-	<EditView
+	<SeekBar
+		android:gravity="center"
 		android:id="@+id/in_game_width"
-		android:gravity="center"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
+		android:max="98"
+		android:progress="7"
 		/>
-	<EditView
-		android:id="@+id/in_game_mines"
+	<SeekBar
 		android:gravity="center"
+		android:id="@+id/in_game_mines"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
+		android:max="9998"
+		android:progress="9"
 		/>
 </LinearLayout>
