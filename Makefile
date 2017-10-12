@@ -41,18 +41,18 @@ run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)
 # Build
 #
 android: $(APK)
-$(APK): logic $(ANDROID) res/*/* *.xml *.properties
+$(APK): $(CLASSES)/$(PACKAGE)/logic/*.class $(ANDROID) res/*/*
 	@ant debug
 
 
 desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
 $(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(DESKTOP)
-	@$(JAVAC) $(DESKTOP)/*.java
+	@$(JAVAC) $(DESKTOP)/*.java && echo "Desktop GUI is built"
 
 
 logic: $(CLASSES)/$(PACKAGE)/logic/*.class
 $(CLASSES)/$(PACKAGE)/logic/*.class: $(CLASSES) $(LOGIC)
-	@$(JAVAC) $(LOGIC)/*.java
+	@$(JAVAC) $(LOGIC)/*.java && echo "Logic is built"
 
 
 $(BIN)/$(PROJECT).jar: build
