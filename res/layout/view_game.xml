@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	>
+	<RelativeLayout
+		android:orientation="horizontal"
+		android:layout_height="wrap_content"
+		android:layout_weight="0"
+		android:layout_width="fill_parent"
+		>
+		<TextView
+			android:id="@+id/txt_game_info"
+			android:gravity="left"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="false"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentRight="false"
+			android:layout_alignParentTop="true"
+			/>
+		<TextView
+			android:id="@+id/txt_time"
+			android:gravity="right"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="false"
+			android:layout_alignParentLeft="false"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			/>
+	</RelativeLayout>
+</LinearLayout>

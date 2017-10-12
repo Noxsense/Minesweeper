@@ -12,6 +12,9 @@ import nox.minesweeper.logic.Field;
  */
 class Game implements Parcelable
 {
+	public final static boolean START_TIME  = true;
+	public final static boolean PLAYED_TIME = false;
+
 	private final static String SEP0 = "!";
 	private final static String SEP1 = ",";
 
@@ -209,7 +212,7 @@ class Game implements Parcelable
 	/**
 	 * Proxy and handler for this.field.open(index).
 	 * @param index  which should be opened.
-	 * @return newly opened indices.
+	 * @return ALL opened indices.
 	 * @throws ArrayIndexOutOfBoundsException 
 	 */
 	public int[] open(int index) throws ArrayIndexOutOfBoundsException
@@ -223,7 +226,7 @@ class Game implements Parcelable
 		int[] indices = this.field.open(index);
 		this.opened   = this.field.getWithState(Field.State.OPEN, 0).length;
 
-		return indices;
+		return this.field.getWithState(Field.State.OPEN, 0);
 	}
 
 
@@ -236,6 +239,17 @@ class Game implements Parcelable
 	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
 	{
 		return this.field.toggleMark(index);
+	}
+
+
+	/**
+	 * Get time of the currently played game on this field.
+	 * @param start if true: Request Start time; false Request: Played Time.
+	 * @return time as long.
+	 */
+	public long getTime(boolean start)
+	{
+		return (start) ? time : time; // TODO
 	}
 
 
