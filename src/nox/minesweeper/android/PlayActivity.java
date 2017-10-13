@@ -380,11 +380,10 @@ public class PlayActivity extends Activity
 					, this.game.discovered(),this.game.field.size()
 					, this.game.field.getMarked(),this.game.mines
 					));
+		str = str + "\n"+this.game.printAll();
 		this.infoText.setText(str);
 
-		str = String.format(getString(R.string.current_game_time),
-				this.game.getTime(Game.PLAYED_TIME)*1e-3);
-		this.timeText.setText(str);
+		this.showTimeInfo();
 
 		if (this.game.field.isWon())
 		{
@@ -394,6 +393,26 @@ public class PlayActivity extends Activity
 		{
 			Toast.makeText(this, getString(R.string.LOST), Toast.LENGTH_SHORT).show();
 		}
+	}
+
+
+	/**
+	 * Display the current time used to play this game.
+	 */
+	private void showTimeInfo()
+	{
+		String str = getString(R.string.current_game_time);
+
+		try
+		{
+			str = String.format(str, this.game.getTime(Game.PLAYED_TIME)*1e-3);
+		}
+		catch (Game.NotStartedException e)
+		{
+			str = String.format(str, 0);
+		}
+
+		this.timeText.setText(str);
 	}
 
 
@@ -423,6 +442,7 @@ public class PlayActivity extends Activity
 				/*Restart the game and redraw the game view.*/
 				PlayActivity.this.game.restart();
 				PlayActivity.this.gameView.invalidate();
+				PlayActivity.this.showInfo();
 			}
 		};
 
