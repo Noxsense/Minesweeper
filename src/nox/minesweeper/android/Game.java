@@ -263,7 +263,7 @@ class Game //implements Parcelable
 		}
 
 		/*Fill field except just clicked index.*/
-		if (this.field.getMines() < this.mines)
+		if (this.discovered() < 1)
 		{
 			this.field.fillRandomly(this.mines, index);
 		}
