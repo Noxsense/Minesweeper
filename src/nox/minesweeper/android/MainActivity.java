@@ -133,7 +133,6 @@ public class MainActivity extends Activity implements OnClickListener
 		{
 			master.loadGame(line);
 		}
-		Toast.makeText(this, "LOAD:\n"+content, Toast.LENGTH_LONG).show();
 	}
 
 
@@ -151,8 +150,6 @@ public class MainActivity extends Activity implements OnClickListener
 		fos  = openFileOutput(filename, Context.MODE_PRIVATE);
 		fos.write(info.getBytes());
 		fos.close();
-
-		Toast.makeText(this, "SAVE:\n"+info, Toast.LENGTH_LONG).show();
 	}
 
 

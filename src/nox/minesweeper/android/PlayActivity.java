@@ -362,9 +362,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			this.game.resume();
 		}
 		catch (Exception e)
-		{
-			Toast.makeText(this, "RESUME: "+android.util.Log.getStackTraceString(e), Toast.LENGTH_LONG).show();
-		}
+		{}
 
 		this.showInfo();
 	}
@@ -378,10 +376,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		if (this.game==null)
 			return;
 
-		try{
 		this.game.pause(); // pause the current game.
-		if (this.game.isPaused()) Toast.makeText(this, this.game.getTime(Game.PLAYED_TIME)+"ms played.",Toast.LENGTH_LONG).show();
-		}catch (Exception e){Toast.makeText(this, "PAUSE: "+android.util.Log.getStackTraceString(e), Toast.LENGTH_LONG).show();}
 	}
 
 
