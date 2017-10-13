@@ -467,6 +467,7 @@ public class Field
 			{
 				tmp[cnt] = i;
 				cnt     += 1;
+				this.get(i).open(); // force to open.
 			}
 		}
 
@@ -710,6 +711,7 @@ public class Field
 		for (int mine : mineIndices)
 		{
 			this.get(mine).setMine(true);
+			this.minesCnt[0] += 1;
 		}
 	}
 
