@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -71,6 +72,9 @@ public class MainActivity extends Activity implements OnClickListener
 
 			int v = (0<master.getGames().size()) ? View.VISIBLE : View.GONE;
 			this.recentGame.setVisibility(v);
+		}
+		catch (IOException fnfe) // no such file
+		{
 		}
 		catch (Exception e) // possible not initated.
 		{

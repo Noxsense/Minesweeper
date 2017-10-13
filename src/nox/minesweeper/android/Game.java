@@ -10,12 +10,12 @@ import nox.minesweeper.logic.Field;
  * Class Game.
  * Contains a size fixed field and fixed number of mines.
  */
-class Game implements Parcelable
+class Game //implements Parcelable
 {
 	public final static boolean START_TIME  = true;
 	public final static boolean PLAYED_TIME = false;
 
-	private final static String SEP0 = "!";
+	private final static String SEP0 = "\t";
 	private final static String SEP1 = ",";
 
 	public final Field field;
@@ -110,7 +110,7 @@ class Game implements Parcelable
 		{
 			indices  = str[3].split(SEP1); // mine
 			int[] is = new int[indices.length];
-			for (int i=0; i<is.length; i++)
+			for (int i=0; i<is.length; i++) // translate string array to int array.
 			{
 				is[i] = Integer.parseInt(indices[i]);
 			}
@@ -121,9 +121,9 @@ class Game implements Parcelable
 		if (0<str[4].length())
 		{
 			indices = str[4].split(SEP1); // open
-			for (String indexS : indices)
+			for (String pos : indices)
 			{
-				parsed.open(Integer.parseInt(indexS));
+				parsed.field.open(Integer.parseInt(pos));
 			}
 		}
 
@@ -131,9 +131,9 @@ class Game implements Parcelable
 		if (0<str[5].length())
 		{
 			indices = str[5].split(SEP1); // marked
-			for (String indexS : indices)
+			for (String pos : indices)
 			{
-				parsed.toggleMark(Integer.parseInt(indexS));
+				parsed.field.toggleMark(Integer.parseInt(pos));
 			}
 		}
 
@@ -163,21 +163,21 @@ class Game implements Parcelable
 		indices = this.field.getMineIndices(); // mines
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? SEP1 : "");
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
 		}
 		s += SEP0;
 
 		indices = this.field.getWithState(Field.State.OPEN, 0); // opened
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? SEP1 : "");
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
 		}
 		s += SEP0;
 
 		indices = this.field.getWithState(Field.State.MARKED, 0); // marked
 		for (int i=0; i<indices.length; i++)
 		{
-			s += i+ ((i<indices.length-1) ? SEP1 : "");
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
 		}
 		s += SEP0;
 
@@ -217,6 +217,12 @@ class Game implements Parcelable
 	 */
 	public int[] open(int index) throws ArrayIndexOutOfBoundsException
 	{
+		/*Nothing to do.*/
+		if (this.field.isLost() || this.field.isWon())
+		{
+			return new int[0];
+		}
+
 		/*Fill field except just clicked index.*/
 		if (this.field.getMines() < this.mines)
 		{
