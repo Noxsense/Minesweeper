@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import nox.minesweeper.logic.Field;
+import nox.minesweeper.logic.Game;
+import nox.minesweeper.logic.Statistic;
 
 
 public class PlayActivity extends Activity implements DialogInterface.OnClickListener
@@ -107,7 +109,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			gap = this.getCellGap();
 
 			// TODO offset and padding, scaling and so on.
-			for (int i=0; i<game.field.size(); i++)
+			for (int i=0; i<game.size(); i++)
 			{
 				coords = this.coords2Pos(this.translateIndex(game, i), gap);
 
@@ -169,7 +171,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			game = PlayActivity.this.game;
 
 			/*Start a new game option, else nothing to do?*/
-			if (game.field.isLost() || game.field.isWon())
+			if (game.isLost() || game.isWon())
 			{
 				PlayActivity.this.getRestartDialog().show();
 				return true;
@@ -294,9 +296,9 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			row = (int) (y / (cellSize + gap));
 			col = (int) (x / (cellSize + gap));
 
-			index = row*game.field.getWidth() + col;
+			index = row*game.getWidth() + col;
 
-			return (index<game.field.size()) ? index : -1;
+			return (index<game.size()) ? index : -1;
 		}
 
 
@@ -307,15 +309,15 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		 */
 		private int[] translateIndex(Game game, int index) throws ArrayIndexOutOfBoundsException
 		{
-			if (game==null || index<0  || index>= game.field.size())
+			if (game==null || index<0  || index>= game.size())
 			{
 				throw new ArrayIndexOutOfBoundsException("Index or game invalid");
 			}
 
 			int[] coords = new int[2];
 
-			coords[ROW]    = index/game.field.getWidth(); // row
-			coords[COL]    = index%game.field.getWidth(); // column
+			coords[ROW]    = index/game.getWidth(); // row
+			coords[COL]    = index%game.getWidth(); // column
 
 			return coords;
 		}
@@ -390,19 +392,18 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		String str;
 		str = String.format(getString(R.string.current_game_info
-					, this.game.discovered(),this.game.field.size()
+					, this.game.discovered(),this.game.size()
 					, this.game.field.getMarked(),this.game.mines
 					));
-		str = str + "\n"+this.game.printAll();
 		this.infoText.setText(str);
 
 		this.showTimeInfo();
 
-		if (this.game.field.isWon())
+		if (this.game.isWon())
 		{
 			Toast.makeText(this, getString(R.string.WON), Toast.LENGTH_SHORT).show();
 		}
-		if (this.game.field.isLost())
+		if (this.game.isLost())
 		{
 			Toast.makeText(this, getString(R.string.LOST), Toast.LENGTH_SHORT).show();
 		}

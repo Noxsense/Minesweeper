@@ -14,6 +14,9 @@ import nox.minesweeper.logic.*;
  */
 public class GameMaster
 {
+	private final static String SEP0 = "\t";
+	private final static String SEP1 = ",";
+
 	private static GameMaster instance;
 
 	private List<Game> games;
@@ -63,7 +66,7 @@ public class GameMaster
 
 		for (Game g : this.games)
 		{
-			s += g.printAll()+"\n";
+			s += GameMaster.printAll(g)+"\n";
 		}
 		return s.trim();
 	}
@@ -80,8 +83,8 @@ public class GameMaster
 	{
 		try
 		{
-		Game parsed = Game.parseGame(info);
-		this.add(parsed, false);
+			Game parsed = GameMaster.parseGame(info);
+			this.add(parsed, false);
 		}
 		catch (NumberFormatException e)
 		{
@@ -216,5 +219,121 @@ public class GameMaster
 	public boolean containsGame(Game game)
 	{
 		return game!=null && this.games.contains(game);
+	}
+
+
+	/**
+	 * Get a String representation of the current state for the given game.
+	 * Format: height|width|mines|mines|opened|marked|played time|stats
+	 * @return game with all mines, marks and open as String.
+	 */
+	private static String printAll(Game game)
+	{
+		if (game==null)
+			return "";
+
+		/*Base information.*/
+		String s = String.format("%d"+SEP0+"%d"+SEP0+"%d"+SEP0
+				,game.field.getHeight()
+				,game.field.getWidth()
+				,game.mines);
+
+		/*Position information.*/
+		int[] indices;
+
+		indices = game.field.getMineIndices(); // mines
+		for (int i=0; i<indices.length; i++)
+		{
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
+		}
+		s += SEP0;
+
+		indices = game.field.getWithState(Field.State.OPEN, 0); // opened
+		for (int i=0; i<indices.length; i++)
+		{
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
+		}
+		s += SEP0;
+
+		indices = game.field.getWithState(Field.State.MARKED, 0); // marked
+		for (int i=0; i<indices.length; i++)
+		{
+			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
+		}
+		s += SEP0;
+
+		/*Currently played time.*/
+		s += game.getTime(Game.PLAYED_TIME);
+		s += SEP0;
+
+		/*Statistics*/
+		s += game.getStatistics().toString().replaceAll("\\s+",SEP1);
+
+		return s;
+	}
+
+
+	/**
+	 * Recreate the Game from the String.
+	 * Format: height|width|mines|mines|opened|marked|stats
+	 * @param str String with information about the Game.
+	 * @return game with parsed attribtues
+	 * @throws NullPointerException if the string is null.
+	 * @throws NumberFormatException if the numbers are invalid.
+	 * @throws ArrayIndexOutOfBoundsException if the parsed indices don't fit.
+	 */
+	protected static Game parseGame(String string) throws NullPointerException, NumberFormatException, ArrayIndexOutOfBoundsException
+	{
+		String[] str, indices;
+		str = string.split(SEP0, 8);
+
+		int height = Integer.parseInt(str[0]);
+		int width  = Integer.parseInt(str[1]);
+		int mines  = Integer.parseInt(str[2]);
+
+		Game parsed = new Game(height, width, mines);
+
+		/*Section for known mines.*/
+		if (0<str[3].length())
+		{
+			indices  = str[3].split(SEP1); // mine
+			int[] is = new int[indices.length];
+			for (int i=0; i<is.length; i++) // translate string array to int array.
+			{
+				is[i] = Integer.parseInt(indices[i]);
+			}
+			parsed.field.fillMines(is);
+		}
+
+		/*Section for opened mines.*/
+		if (0<str[4].length())
+		{
+			indices = str[4].split(SEP1); // open
+			for (String pos : indices)
+			{
+				parsed.open(Integer.parseInt(pos));
+			}
+		}
+
+		/*Section for marked mines.*/
+		if (0<str[5].length())
+		{
+			indices = str[5].split(SEP1); // marked
+			for (String pos : indices)
+			{
+				parsed.toggleMark(Integer.parseInt(pos));
+			}
+		}
+
+		/*Currently played time.*/
+		parsed.resumeWith(Long.parseLong(str[6])); // played time
+		parsed.pause();
+
+		/*Statistics*/
+		Statistic stats = new Statistic(parsed);
+		stats.parseValues(str[7].replaceAll(SEP1, " "));
+		parsed.loadStatisticFrom(stats);
+
+		return parsed;
 	}
 }

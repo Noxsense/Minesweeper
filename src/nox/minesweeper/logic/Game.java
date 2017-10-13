@@ -1,22 +1,15 @@
-package nox.minesweeper.android;
+package nox.minesweeper.logic;
 
-
-import android.os.Parcelable;
-import android.os.Parcel;
-import nox.minesweeper.logic.Field;
 
 
 /**
  * Class Game.
  * Contains a size fixed field and fixed number of mines.
  */
-class Game //implements Parcelable
+public class Game
 {
 	public final static boolean START_TIME  = true;
 	public final static boolean PLAYED_TIME = false;
-
-	private final static String SEP0 = "\t";
-	private final static String SEP1 = ",";
 
 	public final Field field;
 	public final int   mines;
@@ -64,153 +57,53 @@ class Game //implements Parcelable
 	}
 
 
-	public final static Parcelable.Creator<Game> CREATOR = new Parcelable.Creator<Game>()
+	/**
+	 * Shortcut for field.getHeight();
+	 * @return height as int.
+	 */
+	public int getHeight()
 	{
-		@Override
-		public Game createFromParcel(Parcel in)
-		{
-			return Game.parseGame(in.readString());
-		}
-
-
-		@Override
-		public Game[] newArray(int size)
-		{
-			return new Game[size];
-		}
-	};
-
-
-	@Override
-	public int describeContents()
-	{
-		return 0;
-	}
-
-
-	@Override
-	public void writeToParcel(Parcel out, int flags)
-	{
-		/*Dimensions.*/
-		out.writeString(this.printAll());
-		//out.writeInt(this.field.getHeight());
-		//out.writeInt(this.field.getWidth());
-		//out.writeInt(this.mines);
-
-		//[>Positions' status.<]
-		//for (int i=0; i<this.field.size(); i++);
+		return this.field.getHeight();
 	}
 
 
 	/**
-	 * Recreate the Game from the String.
-	 * Format: height|width|mines|mines|opened|marked|stats
-	 * @param str String with information about the Game.
-	 * @return game with parsed attribtues
-	 * @throws NullPointerException if the string is null.
-	 * @throws NumberFormatException if the numbers are invalid.
-	 * @throws ArrayIndexOutOfBoundsException if the parsed indices don't fit.
+	 * Shortcut for field.getWidth();
+	 * @return width as int.
 	 */
-	protected static Game parseGame(String string) throws NullPointerException, NumberFormatException, ArrayIndexOutOfBoundsException
+	public int getWidth()
 	{
-		String[] str, indices;
-		str = string.split(SEP0, 8);
-
-		int height = Integer.parseInt(str[0]);
-		int width  = Integer.parseInt(str[1]);
-		int mines  = Integer.parseInt(str[2]);
-
-		Game parsed = new Game(height, width, mines);
-
-		/*Section for known mines.*/
-		if (0<str[3].length())
-		{
-			indices  = str[3].split(SEP1); // mine
-			int[] is = new int[indices.length];
-			for (int i=0; i<is.length; i++) // translate string array to int array.
-			{
-				is[i] = Integer.parseInt(indices[i]);
-			}
-			parsed.field.fillMines(is);
-		}
-
-		/*Section for opened mines.*/
-		if (0<str[4].length())
-		{
-			indices = str[4].split(SEP1); // open
-			for (String pos : indices)
-			{
-				parsed.field.open(Integer.parseInt(pos));
-			}
-			parsed.opened = indices.length;
-		}
-
-		/*Section for marked mines.*/
-		if (0<str[5].length())
-		{
-			indices = str[5].split(SEP1); // marked
-			for (String pos : indices)
-			{
-				parsed.field.toggleMark(Integer.parseInt(pos));
-			}
-		}
-
-		/*Currently played time.*/
-		parsed.time = Long.parseLong(str[6]); // played time
-		parsed.paused = true;
-
-		/*Statistics*/
-		parsed.stats.parseValues(str[7].replaceAll(SEP1, " "));
-
-		return parsed;
+		return this.field.getWidth();
 	}
 
 
 	/**
-	 * Get a String representation of the current state.
-	 * Format: height|width|mines|mines|opened|marked|stats
-	 * @return this game with all mines, marks and open as String.
+	 * Shortcut for field.size();
+	 * @return size (number if mines) as int.
 	 */
-	protected String printAll()
+	public int size()
 	{
-		/*Base information.*/
-		String s = String.format("%d"+SEP0+"%d"+SEP0+"%d"+SEP0
-				,this.field.getHeight()
-				,this.field.getWidth()
-				,this.mines);
+		return this.field.size();
+	}
 
-		/*Position information.*/
-		int[] indices;
 
-		indices = this.field.getMineIndices(); // mines
-		for (int i=0; i<indices.length; i++)
-		{
-			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
-		}
-		s += SEP0;
+	/**
+	 * Shortcut for field.isWon();
+	 * @return true, if the field is won.
+	 */
+	public boolean isWon()
+	{
+		return this.field.isWon();
+	}
 
-		indices = this.field.getWithState(Field.State.OPEN, 0); // opened
-		for (int i=0; i<indices.length; i++)
-		{
-			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
-		}
-		s += SEP0;
 
-		indices = this.field.getWithState(Field.State.MARKED, 0); // marked
-		for (int i=0; i<indices.length; i++)
-		{
-			s += indices[i]+ ((i<indices.length-1) ? SEP1 : "");
-		}
-		s += SEP0;
-
-		/*Currently played time.*/
-		s += (this.time<0) ? this.time : this.getTime(Game.PLAYED_TIME);
-		s += SEP0;
-
-		/*Statistics*/
-		s += this.stats.toString().replaceAll("\\s+",SEP1);
-
-		return s;
+	/**
+	 * Shortcut for field.isLost();
+	 * @return true, if the field is lost.
+	 */
+	public boolean isLost()
+	{
+		return this.field.isLost();
 	}
 
 
@@ -396,19 +289,30 @@ class Game //implements Parcelable
 
 
 	/**
-	 * If this.isPaused() resume the current game.
+	 * If this.isPaused() resume the current game with the played time.
 	 * Else do nothing.
+	 * @param playedTime time the game was played until it was paused, do nothing if smaller than 0.
 	 */
-	public void resume()
+	public void resumeWith(long playedTime)
 	{
-		if (!this.isPaused())
+		if (!this.isPaused() || playedTime < 0)
 		{
 			return;
 		}
 		
 		/*Restore new start time.*/
-		this.time   = this.getTime(START_TIME);
+		this.time   = Game.now() - playedTime;
 		this.paused = false;
+	}
+
+
+	/**
+	 * If this.isPaused() resume the current game.
+	 * Else do nothing.
+	 */
+	public void resume()
+	{
+		this.resumeWith(this.getTime(PLAYED_TIME));
 	}
 
 
@@ -473,6 +377,16 @@ class Game //implements Parcelable
 	public void resetStatistics()
 	{
 		this.stats.reset();
+	}
+
+
+	/**
+	 * Load statistic from the given statistic.
+	 * @param statistic other statistic to load information from.
+	 */
+	public void loadStatisticFrom(Statistic statistic)
+	{
+		this.stats.loadFrom(statistic);
 	}
 
 

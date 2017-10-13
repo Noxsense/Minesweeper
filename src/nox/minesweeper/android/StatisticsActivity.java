@@ -17,6 +17,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import nox.minesweeper.logic.Game;
+import nox.minesweeper.logic.Statistic;
+
 
 public class StatisticsActivity extends Activity implements OnClickListener
 {

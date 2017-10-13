@@ -20,6 +20,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
+import nox.minesweeper.logic.Game;
+
 
 public class SelectGameActivity extends Activity implements OnClickListener
 {

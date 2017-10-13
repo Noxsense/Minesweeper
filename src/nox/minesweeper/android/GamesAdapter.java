@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import nox.minesweeper.logic.Game;
 
 
 /**

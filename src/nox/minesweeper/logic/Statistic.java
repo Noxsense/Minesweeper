@@ -1,15 +1,11 @@
-package nox.minesweeper.android;
+package nox.minesweeper.logic;
 
-
-//import android.os.Parcelable;
-//import android.os.Parcel;
-import nox.minesweeper.logic.Field;
 
 
 /**
  * Class Statistic.
  */
-class Statistic //implements Parcelable
+public class Statistic
 {
 	public final static int BEST_TIME     = 0;
 	public final static int AVERAGE_TIME  = 1;
@@ -33,6 +29,7 @@ class Statistic //implements Parcelable
 	{
 		this(g.field.getHeight(), g.field.getWidth(), g.mines);
 	}
+
 
 	/**
 	 * Initate a new Statistic.
@@ -63,61 +60,6 @@ class Statistic //implements Parcelable
 		this.gamesLost   = original.gamesLost;
 		this.timeAverage = original.timeAverage;
 		this.timeBest    = original.timeBest;
-	}
-
-
-	/**
-	 * Initate Statistic from Parcel.
-	 * @param in 
-	 */
-	private Statistic(Parcel in)
-	{
-		this.gameHeight = in.readInt();
-		this.gameWidth  = in.readInt();
-		this.gameMines  = in.readInt();
-
-		this.gamesWon    = in.readInt();
-		this.gamesLost   = in.readInt();
-		this.timeAverage = in.readLong();
-		this.timeBest    = in.readLong();
-	}
-
-
-	public final static Parcelable.Creator<Statistic> CREATOR = new Parcelable.Creator<Statistic>()
-	{
-		@Override
-		public Statistic createFromParcel(Parcel in)
-		{
-			return new Statistic(in);
-		}
-
-
-		@Override
-		public Statistic[] newArray(int size)
-		{
-			return new Statistic[size];
-		}
-	};
-
-
-	@Override
-	public int describeContents()
-	{
-		return 0;
-	}
-
-
-	@Override
-	public void writeToParcel(Parcel out, int flags)
-	{
-		out.writeInt(this.gameHeight);
-		out.writeInt(this.gameWidth);
-		out.writeInt(this.gameMines);
-
-		out.writeInt(this.gamesWon);
-		out.writeInt(this.gamesLost);
-		out.writeLong(this.timeAverage);
-		out.writeLong(this.timeBest);
 	}
 
 
@@ -228,6 +170,39 @@ class Statistic //implements Parcelable
 		this.gamesLost   = 0;
 		this.timeAverage = 0;
 		this.timeBest    = Long.MAX_VALUE;
+	}
+
+
+	/**
+	 * Fill own statistic values with values of other statistic, if they are matching.
+	 * @param that other statistic.
+	 */
+	public void loadFrom(Statistic that)
+	{
+		if (that==null || !this.match(that))
+		{
+			return;
+		}
+
+		this.gamesWon    = that.gamesWon;
+		this.gamesLost   = that.gamesLost;
+		this.timeAverage = that.timeAverage;
+		this.timeBest    = that.timeBest;
+	}
+
+
+	/**
+	 * Check if the other statistic would match the same game like this.
+	 * @param that other statistic.
+	 * @return true, if the dimenesions are the same.
+	 */
+	public boolean match(Statistic that)
+	{
+		return that!=null
+			&& that.gameHeight == this.gameHeight
+			&& that.gameWidth  == this.gameWidth
+			&& that.gameMines  == this.gameMines
+			;
 	}
 
 
