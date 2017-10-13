@@ -30,7 +30,7 @@ public class MainActivity extends Activity implements OnClickListener
 
 	private GameMaster master;
 	//private Button about;
-	private static String SAVED_MASTER = "minesweeper_game_master.txt";
+	public static String SAVED_MASTER = "minesweeper_game_master.txt";
 
 
 	/**
@@ -61,7 +61,7 @@ public class MainActivity extends Activity implements OnClickListener
 
 		try
 		{
-			this.loadMaster(SAVED_MASTER);
+			MainActivity.loadMaster(this, SAVED_MASTER);
 		}
 		catch (IOException fnfe) // no such file
 		{
@@ -97,7 +97,7 @@ public class MainActivity extends Activity implements OnClickListener
 		/*Save game stati.*/
 		try
 		{
-			this.saveMaster(SAVED_MASTER);
+			MainActivity.saveMaster(this, SAVED_MASTER);
 		}
 		catch (Exception e)
 		{
@@ -108,10 +108,11 @@ public class MainActivity extends Activity implements OnClickListener
 
 	/**
 	 * Load the GameMaster from an internal file. 
+	 * @param a Activity who calls this method.
 	 * @param filename of internal file
 	 * @throws Exception IOException
 	 */
-	private void loadMaster(String filename) throws Exception
+	protected static void loadMaster(Activity a, String filename) throws Exception
 	{
 		FileInputStream fis;
 		StringBuffer    content;
@@ -120,7 +121,7 @@ public class MainActivity extends Activity implements OnClickListener
 		buf     = new byte[1024];
 		content = new StringBuffer("");
 
-		fis = openFileInput(SAVED_MASTER);
+		fis = a.openFileInput(SAVED_MASTER);
 		while (fis.read(buf) != -1)
 		{
 			content.append(new String(buf));
@@ -129,6 +130,7 @@ public class MainActivity extends Activity implements OnClickListener
 
 		if (content.length()<1) return; // nothing to load
 
+		GameMaster master = GameMaster.getInstance();
 		for (String line : content.toString().split("\\n"))
 		{
 			master.loadGame(line);
@@ -138,16 +140,17 @@ public class MainActivity extends Activity implements OnClickListener
 
 	/**
 	 * Saves the GameMaster into an internal file. 
+	 * @param a Activity who calls this method.
 	 * @param filename of internal file
 	 * @throws Exception IOException
 	 */
-	private void saveMaster(String filename) throws Exception
+	protected static void saveMaster(Activity a, String filename) throws Exception
 	{
 		String info;
 		FileOutputStream fos;
 
-		info = master.printAllGames();
-		fos  = openFileOutput(filename, Context.MODE_PRIVATE);
+		info = GameMaster.getInstance().printAllGames();
+		fos  = a.openFileOutput(filename, Context.MODE_PRIVATE);
 		fos.write(info.getBytes());
 		fos.close();
 	}

@@ -275,7 +275,7 @@ public class GameMaster
 
 	/**
 	 * Recreate the Game from the String.
-	 * Format: height|width|mines|mines|opened|marked|stats
+	 * Format: height|width|mines|mines|opened|marked|played time|stats
 	 * @param str String with information about the Game.
 	 * @return game with parsed attribtues
 	 * @throws NullPointerException if the string is null.
@@ -311,7 +311,7 @@ public class GameMaster
 			indices = str[4].split(SEP1); // open
 			for (String pos : indices)
 			{
-				parsed.open(Integer.parseInt(pos));
+				parsed.field.open(Integer.parseInt(pos));
 			}
 		}
 

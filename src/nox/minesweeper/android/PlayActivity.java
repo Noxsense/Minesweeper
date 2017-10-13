@@ -109,7 +109,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			gap = this.getCellGap();
 
 			// TODO offset and padding, scaling and so on.
-			for (int i=0; i<game.size(); i++)
+			for (int i=0; i<game.field.size(); i++)
 			{
 				coords = this.coords2Pos(this.translateIndex(game, i), gap);
 
@@ -171,7 +171,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			game = PlayActivity.this.game;
 
 			/*Start a new game option, else nothing to do?*/
-			if (game.isLost() || game.isWon())
+			if (game.field.isLost() || game.field.isWon())
 			{
 				PlayActivity.this.getRestartDialog().show();
 				return true;
@@ -296,9 +296,9 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			row = (int) (y / (cellSize + gap));
 			col = (int) (x / (cellSize + gap));
 
-			index = row*game.getWidth() + col;
+			index = row*game.field.getWidth() + col;
 
-			return (index<game.size()) ? index : -1;
+			return (index<game.field.size()) ? index : -1;
 		}
 
 
@@ -309,15 +309,15 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		 */
 		private int[] translateIndex(Game game, int index) throws ArrayIndexOutOfBoundsException
 		{
-			if (game==null || index<0  || index>= game.size())
+			if (game==null || index<0  || index>= game.field.size())
 			{
 				throw new ArrayIndexOutOfBoundsException("Index or game invalid");
 			}
 
 			int[] coords = new int[2];
 
-			coords[ROW]    = index/game.getWidth(); // row
-			coords[COL]    = index%game.getWidth(); // column
+			coords[ROW]    = index/game.field.getWidth(); // row
+			coords[COL]    = index%game.field.getWidth(); // column
 
 			return coords;
 		}
@@ -379,6 +379,13 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			return;
 
 		this.game.pause(); // pause the current game.
+
+		try
+		{
+			MainActivity.saveMaster(this,MainActivity.SAVED_MASTER);
+		}
+		catch (Exception e)
+		{}
 	}
 
 
@@ -392,18 +399,18 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		String str;
 		str = String.format(getString(R.string.current_game_info
-					, this.game.discovered(),this.game.size()
+					, this.game.discovered(),this.game.field.size()
 					, this.game.field.getMarked(),this.game.mines
 					));
 		this.infoText.setText(str);
 
 		this.showTimeInfo();
 
-		if (this.game.isWon())
+		if (this.game.field.isWon())
 		{
 			Toast.makeText(this, getString(R.string.WON), Toast.LENGTH_SHORT).show();
 		}
-		if (this.game.isLost())
+		if (this.game.field.isLost())
 		{
 			Toast.makeText(this, getString(R.string.LOST), Toast.LENGTH_SHORT).show();
 		}
@@ -417,14 +424,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 	{
 		String str = getString(R.string.current_game_time);
 
-		try
-		{
-			str = String.format(str, this.game.getTime(Game.PLAYED_TIME)*1e-3);
-		}
-		catch (Game.NotStartedException e)
-		{
-			str = String.format(str, 0.);
-		}
+		str = String.format(str, this.game.getTime(Game.PLAYED_TIME)*1e-3);
 
 		this.timeText.setText(str);
 	}

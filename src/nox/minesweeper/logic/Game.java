@@ -51,59 +51,7 @@ public class Game
 		this.mines = mines;
 		this.stats = new Statistic(this);
 
-		this.opened = 0;
-		this.time   = -1;
-		this.paused = true;
-	}
-
-
-	/**
-	 * Shortcut for field.getHeight();
-	 * @return height as int.
-	 */
-	public int getHeight()
-	{
-		return this.field.getHeight();
-	}
-
-
-	/**
-	 * Shortcut for field.getWidth();
-	 * @return width as int.
-	 */
-	public int getWidth()
-	{
-		return this.field.getWidth();
-	}
-
-
-	/**
-	 * Shortcut for field.size();
-	 * @return size (number if mines) as int.
-	 */
-	public int size()
-	{
-		return this.field.size();
-	}
-
-
-	/**
-	 * Shortcut for field.isWon();
-	 * @return true, if the field is won.
-	 */
-	public boolean isWon()
-	{
-		return this.field.isWon();
-	}
-
-
-	/**
-	 * Shortcut for field.isLost();
-	 * @return true, if the field is lost.
-	 */
-	public boolean isLost()
-	{
-		return this.field.isLost();
+		this.restart();
 	}
 
 
@@ -155,8 +103,9 @@ public class Game
 			return new int[0];
 		}
 
-		/*Fill field except just clicked index.*/
-		if (this.discovered() < 1)
+		/*First Move: Fill field except just clicked index.*/
+		if (this.field.getMines()<this.mines)
+		//if (this.discovered() < 1 && this.field.getMines()<this.mines)
 		{
 			this.field.fillRandomly(this.mines, index);
 		}
@@ -199,13 +148,15 @@ public class Game
 	public void restart()
 	{
 		/*Nothing to do: Game is not finished yet.*/
-		if (!(this.field.isLost() || this.field.isWon()))
+		if (this.isRunning())
 		{
 			return;
 		}
 
 		this.field.fillMines(new int[0]); // fill with no mine == clear
-		this.time = -1;
+		this.opened = 0;
+		this.time   = -1;
+		this.paused = true;
 	}
 
 
@@ -229,10 +180,7 @@ public class Game
 			return;
 		}
 
-		for (int i : this.field.reveal())
-		{
-			this.field.open(i);
-		}
+		this.field.reveal();
 		this.stats.addLost();
 	}
 
