@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.view.View.OnClickListener;
 import android.view.View;
 import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.SeekBar;
@@ -29,6 +32,9 @@ public class SelectGameActivity extends Activity implements OnClickListener
 	private SeekBar       inGameHeight;
 	private SeekBar       inGameWidth;
 	private SeekBar       inGameMines;
+
+	private OnItemClickListener     selectGameListener;
+	private OnItemLongClickListener editGameListener;
 
 	private static int    HEIGHT_MIN = 1;
 	private static int    MINES_MIN  = 1;
@@ -57,6 +63,48 @@ public class SelectGameActivity extends Activity implements OnClickListener
 		this.createGame.setText(getString(R.string.custom_game));
 		this.createGame.setVisibility(View.VISIBLE);
 		this.createGame.setOnClickListener(this);
+
+		this.selectGameListener = new OnItemClickListener()
+		{
+			private GameMaster master = GameMaster.getInstance();
+
+			@Override
+			public void onItemClick(AdapterView<?> parent,
+					View view, int pos, long id)
+			{
+				if (parent==null || view==null)
+				{
+					return;
+				}
+
+				/*Move the selected game to head.*/
+				master.get(master.get(pos));
+
+				SelectGameActivity.this.openGame();
+			}
+		};
+		this.editGameListener = new OnItemLongClickListener()
+		{
+			private GameMaster master = GameMaster.getInstance();
+
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent,
+					View view, int pos, long id)
+			{
+				/*Consumed, but invalid.*/
+				if (parent==null || view==null)
+				{
+					return true;
+				}
+
+				Toast.makeText(SelectGameActivity.this, "Edit this game: "+master.get(pos), Toast.LENGTH_LONG).show();
+
+				return true;
+			}
+		};
+		this.gamesView.setOnItemClickListener(this.selectGameListener);
+		this.gamesView.setOnItemLongClickListener(this.editGameListener);
 	}
 
 
@@ -183,7 +231,8 @@ public class SelectGameActivity extends Activity implements OnClickListener
 				if (seekbar.equals(SelectGameActivity.this.inGameMines))
 					return;
 
-				SelectGameActivity.this.inGameMines.setMax(in[HEIGHT]+in[WIDTH]-1);
+				SelectGameActivity
+					.this.inGameMines.setMax(in[HEIGHT]+in[WIDTH]-2);
 			}
 
 			@Override public void onStartTrackingTouch(SeekBar seekbar)

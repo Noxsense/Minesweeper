@@ -124,6 +124,7 @@ public class GameMaster
 
 	/**
 	 * Add a new Game into the store.
+	 * Add the game as new head (most recently called).
 	 * @param game new Game to remember.
 	 */
 	private void add(Game game)
@@ -151,6 +152,22 @@ public class GameMaster
 	public Game get(int index) throws IndexOutOfBoundsException
 	{
 		return this.games.get(index);
+	}
+
+
+	/**
+	 * Get a game with the attributes of the given game.
+	 * Proxy for this.getGameWith(int,int,int).
+	 * @param game which should be in the store and should be returned.
+	 * @return game with the same attributes, but stored.
+	 * @throws NullPointerException the given game is null.
+	 */
+	public Game get(Game game) throws NullPointerException, ArrayIndexOutOfBoundsException
+	{
+		return this.getGameWith(
+				game.field.getHeight(),
+				game.field.getWidth(),
+				game.mines);
 	}
 
 
