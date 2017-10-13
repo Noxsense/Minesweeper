@@ -21,6 +21,7 @@ class Game //implements Parcelable
 	public final Field field;
 	public final int   mines;
 
+	private boolean    paused;
 	private long       time;
 	private Statistic  stats;
 	private int        opened;
@@ -58,7 +59,8 @@ class Game //implements Parcelable
 		this.stats = new Statistic(this);
 
 		this.opened = 0;
-		this.time   = 0;
+		this.time   = -1;
+		this.paused = true;
 	}
 
 
@@ -112,7 +114,7 @@ class Game //implements Parcelable
 	protected static Game parseGame(String string) throws NullPointerException, NumberFormatException, ArrayIndexOutOfBoundsException
 	{
 		String[] str, indices;
-		str = string.split(SEP0, 7);
+		str = string.split(SEP0, 8);
 
 		int height = Integer.parseInt(str[0]);
 		int width  = Integer.parseInt(str[1]);
@@ -140,6 +142,7 @@ class Game //implements Parcelable
 			{
 				parsed.field.open(Integer.parseInt(pos));
 			}
+			parsed.opened = indices.length;
 		}
 
 		/*Section for marked mines.*/
@@ -152,8 +155,12 @@ class Game //implements Parcelable
 			}
 		}
 
+		/*Currently played time.*/
+		parsed.time = Long.parseLong(str[6]); // played time
+		parsed.paused = true;
+
 		/*Statistics*/
-		parsed.stats.parseValues(str[6].replaceAll(SEP1, " "));
+		parsed.stats.parseValues(str[7].replaceAll(SEP1, " "));
 
 		return parsed;
 	}
@@ -196,10 +203,25 @@ class Game //implements Parcelable
 		}
 		s += SEP0;
 
+		/*Currently played time.*/
+		s += (this.time<0) ? this.time : this.getTime(Game.PLAYED_TIME);
+		s += SEP0;
+
 		/*Statistics*/
 		s += this.stats.toString().replaceAll("\\s+",SEP1);
 
 		return s;
+	}
+
+
+	/**
+	 * Check if the Game is currently paused.
+	 * The game is running and paused!
+	 * @return true, if the game is currently running and paused.
+	 */
+	public boolean isPaused()
+	{
+		return this.isRunning() && this.paused;
 	}
 
 
@@ -253,7 +275,7 @@ class Game //implements Parcelable
 		/*Handle end of game & stores played time in time.*/
 		if (this.field.isLost() || this.field.isWon())
 		{
-			this.time = System.currentTimeMillis() - startTime; // played time
+			this.time = Game.now() - startTime; // played time
 			this.handleEndGame();
 		}
 
@@ -344,13 +366,49 @@ class Game //implements Parcelable
 	 */
 	private long setTimeStart()
 	{
-		/*Game hasn't started yet.*/
-		if (this.discovered()<1 || this.field.isLost() || this.field.isWon() || this.time<0)
+		/*Game hasn't started yet: Initate time*/
+		if (!this.isRunning() || this.time<0)
 		{
-			this.time = System.currentTimeMillis();
+			this.time = Game.now();
 		}
 
+		/*Game is started, but currently paused: Resume.*/
+		else if (this.isPaused())
+		{
+			/*Get Start time by currntly played time.*/
+			this.resume();
+		}
+
+		this.paused = false;
 		return this.getTime(Game.START_TIME);
+	}
+
+
+	/**
+	 * Pause the game.
+	 * Save played time and set to pause.
+	 */
+	public void pause()
+	{
+		this.time   = (this.time<0) ? this.time : this.getTime(Game.PLAYED_TIME);
+		this.paused = true;
+	}
+
+
+	/**
+	 * If this.isPaused() resume the current game.
+	 * Else do nothing.
+	 */
+	public void resume()
+	{
+		if (!this.isPaused())
+		{
+			return;
+		}
+		
+		/*Restore new start time.*/
+		this.time   = this.getTime(START_TIME);
+		this.paused = false;
 	}
 
 
@@ -358,24 +416,43 @@ class Game //implements Parcelable
 	 * Get time of the currently played game on this field.
 	 * @param start if true: Request Start time; false Request: Played Time.
 	 * @return time as long.
-	 * @throws NotStartedException
+	 * @throws NotStartedException if start is requested but game hasn't started yet.
 	 */
 	public long getTime(boolean start) throws NotStartedException
 	{
-		/*Game hasn't started yet.*/
-		if (time<0)
+		if (start) // REQUEST: Start time
 		{
-			throw new NotStartedException(this);
-		}
+			if (time<0) // not started yet: Exception
+			{
+				throw new NotStartedException(this);
+			}
 
-		/*While running: Time stores start time.*/
-		if (this.isRunning())
+			/*On Pause or end: Time stores played time.*/
+			return (this.isPaused() || !this.isRunning())
+				? Game.now() - this.time
+				: this.time;
+		}
+		else // REQUEST: Played Time
 		{
-			return (start) ? time : System.currentTimeMillis() - time;
+			return (this.time<0)
+				? 0
+				/*On Pause or end: Time stores played time.*/
+				: ((this.isPaused() || !this.isRunning())
+						? this.time
+						: Game.now() - this.time
+				  );
 		}
+	}
 
-		/*Eventually: Time stores played time.*/
-		return (start) ? time - System.currentTimeMillis() : time;
+
+	/**
+	 * Uniform the current time.
+	 * Avoid using different time sources.
+	 * @return current time as long.
+	 */
+	public static long now()
+	{
+		return System.currentTimeMillis();
 	}
 
 

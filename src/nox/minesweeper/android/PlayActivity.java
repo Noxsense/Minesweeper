@@ -357,6 +357,9 @@ public class PlayActivity extends Activity
 		try
 		{
 			this.game = master.get(0);
+
+			/*Resume if already started.*/
+			this.game.resume();
 		}
 		catch (Exception e)
 		{
@@ -364,6 +367,18 @@ public class PlayActivity extends Activity
 		}
 
 		this.showInfo();
+	}
+
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+
+		if (this.game==null)
+			return;
+
+		this.game.pause(); // pause the current game.
 	}
 
 
