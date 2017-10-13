@@ -314,8 +314,8 @@ public class PlayActivity extends Activity
 
 			int[] coords = new int[2];
 
-			coords[ROW]    = index/game.field.getHeight(); // row
-			coords[COL]    = index%game.field.getHeight(); // column
+			coords[ROW]    = index/game.field.getWidth(); // row
+			coords[COL]    = index%game.field.getWidth(); // column
 
 			return coords;
 		}
