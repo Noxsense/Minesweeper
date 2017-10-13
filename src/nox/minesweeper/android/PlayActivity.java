@@ -2,16 +2,20 @@ package nox.minesweeper.android;
 
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.LinearLayout;
+import android.view.View;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +32,9 @@ public class PlayActivity extends Activity
 	private TextView timeText;
 
 	private Game     game;
+
+	private Dialog   restartGame;
+
 
 	/**
 	 * Class GameView.
@@ -49,6 +56,11 @@ public class PlayActivity extends Activity
 		private List<Integer> aimedPos; // instead of int[]
 
 
+		/**
+		 * Create a new Gameview.
+		 * Initate the colours and anything.
+		 * @param context 
+		 */
 		public GameView(Context context)
 		{
 			super(context);
@@ -155,6 +167,13 @@ public class PlayActivity extends Activity
 			Game game;
 
 			game = PlayActivity.this.game;
+
+			/*Start a new game option, else nothing to do?*/
+			if (game.field.isLost() || game.field.isWon())
+			{
+				PlayActivity.this.getRestartDialog().show();
+				return true;
+			}
 
 			action  = e.getAction();
 			pointer = action >> MotionEvent.ACTION_POINTER_ID_SHIFT;
@@ -357,12 +376,63 @@ public class PlayActivity extends Activity
 			return;
 
 		String str;
-		str = "Cells: "
-			+ this.game.discovered()+"/"+this.game.field.size() + ", "
-			+ "Mines: "
-			+ this.game.field.getMarked()+"/"+this.game.mines;
-
+		str = String.format(getString(R.string.current_game_info
+					, this.game.discovered(),this.game.field.size()
+					, this.game.field.getMarked(),this.game.mines
+					));
 		this.infoText.setText(str);
-		this.timeText.setText("Time: "+this.game.getTime(Game.PLAYED_TIME));
+
+		str = String.format(getString(R.string.current_game_time),
+				this.game.getTime(Game.PLAYED_TIME)*1e-3);
+		this.timeText.setText(str);
+
+		if (this.game.field.isWon())
+		{
+			Toast.makeText(this, getString(R.string.WON), Toast.LENGTH_SHORT).show();
+		}
+		if (this.game.field.isLost())
+		{
+			Toast.makeText(this, getString(R.string.LOST), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+
+	/**
+	 * Get the dialog to restart the game.
+	 * @return dialog with accept button.
+	 */
+	private Dialog getRestartDialog()
+	{
+		if (this.restartGame != null)
+		{
+			return this.restartGame;
+		}
+
+		/*Dialog: Accept => Restart the game.*/
+		DialogInterface.OnClickListener listener;
+		listener = new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int button)
+			{
+				if (button != Dialog.BUTTON_POSITIVE)
+				{
+					return;
+				}
+
+				/*Restart the game and redraw the game view.*/
+				PlayActivity.this.game.restart();
+				PlayActivity.this.gameView.invalidate();
+			}
+		};
+
+		/*Initate Dialog.*/
+		this.restartGame = new AlertDialog.Builder(this)
+			.setTitle(R.string.restart_game)
+			//.setMessage(R.string.restart_game_warning)
+			.setPositiveButton(R.string.accept, listener)
+			.create();
+
+		return this.getRestartDialog();
 	}
 }

@@ -224,9 +224,52 @@ class Game implements Parcelable
 		}
 
 		int[] indices = this.field.open(index);
-		this.opened   = this.field.getWithState(Field.State.OPEN, 0).length;
 
-		return this.field.getWithState(Field.State.OPEN, 0);
+		/*Handle lost game*/
+		if (this.field.isLost())
+		{
+			this.reveal();
+		}
+
+		/*Handle won game*/
+		if (this.field.isWon())
+		{
+			this.stats.addWon(this.getTime(Game.PLAYED_TIME));
+		}
+
+		indices     = this.field.getWithState(Field.State.OPEN, 0);
+		this.opened = indices.length;
+
+		return indices;
+	}
+
+
+	/**
+	 * Empties the field and start a new party.
+	 * Only possible, if there is no current game.
+	 */
+	public void restart()
+	{
+		/*Nothing to do: Game is not finished yet.*/
+		if (!(this.field.isLost() || this.field.isWon()))
+		{
+			return;
+		}
+
+		this.field.fillMines(new int[0]);
+	}
+
+
+	/**
+	 * Set the Game as Lost and open all mines.
+	 */
+	public void reveal()
+	{
+		for (int i : this.field.reveal())
+		{
+			this.field.open(i);
+		}
+		this.stats.addLost();
 	}
 
 
