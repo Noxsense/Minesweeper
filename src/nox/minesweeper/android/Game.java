@@ -25,6 +25,21 @@ class Game //implements Parcelable
 	private Statistic  stats;
 	private int        opened;
 
+
+	/**
+	 * Class NotStartedException.
+	 * An exception which may be thrown if there are some
+	 * accesses but the game has not started yet.
+	 */
+	public static class NotStartedException extends NullPointerException
+	{
+		public NotStartedException(Game game)
+		{
+			super("Game \""+game+"\" hasn't started yet.");
+		}
+	}
+
+
 	/**
 	 * Initate a new Game with the given attributes.
 	 * @param width 
@@ -190,12 +205,14 @@ class Game //implements Parcelable
 
 	/**
 	 * Check if the Game is currently running.
-	 * Running: First index is open and neighter won nor lost.
+	 * Running: First move is done and field is neighter won nor lost.
 	 * @return true, if the game is currently running.
 	 */
 	public boolean isRunning()
 	{
-		return false;
+		return this.discovered()>0
+			&& !this.field.isLost()
+			&& !this.field.isWon();
 	}
 
 
@@ -229,24 +246,34 @@ class Game //implements Parcelable
 			this.field.fillRandomly(this.mines, index);
 		}
 
+		long startTime = this.setTimeStart();
+
 		int[] indices = this.field.open(index);
 
-		/*Handle lost game*/
-		if (this.field.isLost())
+		/*Handle end of game & stores played time in time.*/
+		if (this.field.isLost() || this.field.isWon())
 		{
-			this.reveal();
-		}
-
-		/*Handle won game*/
-		if (this.field.isWon())
-		{
-			this.stats.addWon(this.getTime(Game.PLAYED_TIME));
+			this.time = System.currentTimeMillis() - startTime; // played time
+			this.handleEndGame();
 		}
 
 		indices     = this.field.getWithState(Field.State.OPEN, 0);
 		this.opened = indices.length;
 
 		return indices;
+	}
+
+
+	/**
+	 * Handle the end of the game.
+	 */
+	private void handleEndGame() throws NotStartedException
+	{
+		if (this.field.isWon())
+			this.stats.addWon(this.getTime(Game.PLAYED_TIME));
+
+		if (this.field.isLost())
+			this.reveal();
 	}
 
 
@@ -262,15 +289,31 @@ class Game //implements Parcelable
 			return;
 		}
 
-		this.field.fillMines(new int[0]);
+		this.field.fillMines(new int[0]); // fill with no mine == clear
+		this.time = -1;
 	}
 
 
 	/**
 	 * Set the Game as Lost and open all mines.
+	 * If the game hasn't started yet: Nothing opened, accidently marked..
+	 * it's not lost.
 	 */
 	public void reveal()
 	{
+		/*Not started yet: Nothing to do.*/
+		if (this.discovered()<1)
+		{
+			return;
+		}
+
+		/*There are no mines, but it's already marked.*/
+		if (this.field.getMines()<1 && 0<this.field.getMarked())
+		{
+			this.field.fillMines(new int[0]);
+			return;
+		}
+
 		for (int i : this.field.reveal())
 		{
 			this.field.open(i);
@@ -287,7 +330,27 @@ class Game //implements Parcelable
 	 */
 	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
 	{
+		/*First move: Initate the game.*/
+		this.setTimeStart();
+
 		return this.field.toggleMark(index);
+	}
+
+
+	/**
+	 * Start the game now.
+	 * If the game is already running, do nothing.
+	 * @return the start time.
+	 */
+	private long setTimeStart()
+	{
+		/*Game hasn't started yet.*/
+		if (this.discovered()<1 || this.field.isLost() || this.field.isWon() || this.time<0)
+		{
+			this.time = System.currentTimeMillis();
+		}
+
+		return this.getTime(Game.START_TIME);
 	}
 
 
@@ -295,10 +358,24 @@ class Game //implements Parcelable
 	 * Get time of the currently played game on this field.
 	 * @param start if true: Request Start time; false Request: Played Time.
 	 * @return time as long.
+	 * @throws NotStartedException
 	 */
-	public long getTime(boolean start)
+	public long getTime(boolean start) throws NotStartedException
 	{
-		return (start) ? time : time; // TODO
+		/*Game hasn't started yet.*/
+		if (time<0)
+		{
+			throw new NotStartedException(this);
+		}
+
+		/*While running: Time stores start time.*/
+		if (this.isRunning())
+		{
+			return (start) ? time : System.currentTimeMillis() - time;
+		}
+
+		/*Eventually: Time stores played time.*/
+		return (start) ? time - System.currentTimeMillis() : time;
 	}
 
 
@@ -309,6 +386,16 @@ class Game //implements Parcelable
 	public Statistic getStatistics()
 	{
 		return new Statistic(this.stats);
+	}
+
+
+	/**
+	 * Reset the statistics for this game.
+	 * This will set all counters to default.
+	 */
+	public void resetStatistics()
+	{
+		this.stats.reset();
 	}
 
 
@@ -335,6 +422,7 @@ class Game //implements Parcelable
 		return o!=null && o instanceof Game && this.equals((Game) o);
 	}
 
+
 	/**
 	 * Compare this dimensions with other dimensions.
 	 * @param g 
@@ -347,6 +435,7 @@ class Game //implements Parcelable
 				g.field.getWidth(),
 				g.mines);
 	}
+
 
 	/**
 	 * Compare with dimensions.

@@ -1,19 +1,18 @@
 package nox.minesweeper.android;
 
 
-import android.os.Parcelable;
-import android.os.Parcel;
+//import android.os.Parcelable;
+//import android.os.Parcel;
 import nox.minesweeper.logic.Field;
 
 
 /**
  * Class Statistic.
  */
-class Statistic implements Parcelable
+class Statistic //implements Parcelable
 {
 	public final static int BEST_TIME     = 0;
 	public final static int AVERAGE_TIME  = 1;
-	public final static int CELL_TIME     = 2;
 
 	private int  gameHeight, gameWidth, gameMines;
 
@@ -24,7 +23,6 @@ class Statistic implements Parcelable
 
 	private long timeAverage;
 	private long timeBest;
-	private long timePerCell;
 
 	/**
 	 * Initate a new Statistic.
@@ -49,10 +47,7 @@ class Statistic implements Parcelable
 		this.gameWidth  = width;
 		this.gameMines  = mines;
 
-		this.gamesWon    = 0;
-		this.gamesLost   = 0;
-		this.timeAverage = 0;
-		this.timeBest    = Long.MAX_VALUE;
+		this.reset();
 	}
 
 
@@ -129,10 +124,20 @@ class Statistic implements Parcelable
 	/**
 	 * Add a new game as won.
 	 * Recalculates also best time and average time.
+	 * @param won  if true, the game is won, else lost.
 	 * @param time time of won game.
 	 */
-	public void addWon(long time)
+	public void addWon(boolean won, long time)
 	{
+		/*Lost game: Lose streak, add lost game. Return.*/
+		if (!won)
+		{
+			this.gamesLost += 1;
+			this.streak     = 0;
+			return;
+		}
+
+		/*Won game: Calculates new average, best and add to streak.*/
 		long sum         = this.timeAverage*this.gamesWon;
 		this.timeAverage = (sum+time)/(this.gamesWon+=1);
 
@@ -142,12 +147,22 @@ class Statistic implements Parcelable
 
 
 	/**
+	 * Add a new game as won.
+	 * Recalculates also best time and average time.
+	 * @param time time of won game.
+	 */
+	public void addWon(long time)
+	{
+		this.addWon(true, time);
+	}
+
+
+	/**
 	 * Add a new game as lost.
 	 */
 	public void addLost()
 	{
-		this.gamesLost += 1;
-		this.streak     = 0;
+		this.addWon(false, 0);
 	}
 
 
@@ -165,9 +180,8 @@ class Statistic implements Parcelable
 
 		switch(which)
 		{
-			case BEST_TIME: return this.timeBest;
-			case CELL_TIME: return this.timePerCell;
 			case AVERAGE_TIME: return this.timeAverage;
+			case BEST_TIME: return this.timeBest;
 			default: return -1;
 		}
 	}
@@ -191,6 +205,29 @@ class Statistic implements Parcelable
 	public int allGames()
 	{
 		return this.gamesLost + this.gamesWon;
+	}
+
+
+	/**
+	 * Get the count of cells which are contained in the mathing field.
+	 * @return width * height as int.
+	 */
+	public int cells()
+	{
+		return this.gameWidth*this.gameHeight;
+	}
+
+
+	/**
+	 * Reset the statistics.
+	 * This will set all counters to default.
+	 */
+	public void reset()
+	{
+		this.gamesWon    = 0;
+		this.gamesLost   = 0;
+		this.timeAverage = 0;
+		this.timeBest    = Long.MAX_VALUE;
 	}
 
 
@@ -230,5 +267,3 @@ class Statistic implements Parcelable
 			;
 	}
 }
-
-

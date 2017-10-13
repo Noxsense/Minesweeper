@@ -15,8 +15,12 @@
 
 	<string name="select_game">Select a Game</string>
 	<string name="custom_game">Create a custom Game</string>
+
 	<string name="restart_game">Restart the current Game</string>
 	<string name="restart_game_warning"></string>
+
+	<string name="reset_stats">Reset the Statitstics of this Game.</string>
+	<string name="reset_stats_warning">Lost and won games, best and average time and also streak will be gone.</string>
 
 	<string name="current_game_time">Time %1$.2f s</string>
 	<string name="current_game_info">Cells %1$d/%2$d, Mines: %3$d/%4$d</string>
