@@ -58,30 +58,34 @@ public class MainActivity extends Activity implements OnClickListener
 		this.master = GameMaster.getInstance();
 
 		this.findButtons();
+
+		try
+		{
+			this.loadMaster(SAVED_MASTER);
+		}
+		catch (IOException fnfe) // no such file
+		{
+		}
+		catch (Exception error) // probably parsing errors
+		{
+			Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 
 	@Override
 	public void onResume()
 	{
-		super.onStart();
+		super.onResume();
 
-		try
-		{
-			this.loadMaster(SAVED_MASTER);
-
-			int v = (0<master.getGames().size()) ? View.VISIBLE : View.GONE;
-			this.recentGame.setVisibility(v);
-		}
-		catch (IOException fnfe) // no such file
-		{
-		}
-		catch (Exception e) // possible not initated.
+		if (this.recentGame == null)
 		{
 			this.findButtons();
-			this.recentGame.setVisibility(View.GONE);
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+
+		/*Hide or show the recent game button.*/
+		int v = (0<master.getGames().size()) ? View.VISIBLE : View.GONE;
+		this.recentGame.setVisibility(v);
 	}
 
 
@@ -129,6 +133,7 @@ public class MainActivity extends Activity implements OnClickListener
 		{
 			master.loadGame(line);
 		}
+		Toast.makeText(this, "LOAD:\n"+content, Toast.LENGTH_LONG).show();
 	}
 
 
@@ -146,6 +151,8 @@ public class MainActivity extends Activity implements OnClickListener
 		fos  = openFileOutput(filename, Context.MODE_PRIVATE);
 		fos.write(info.getBytes());
 		fos.close();
+
+		Toast.makeText(this, "SAVE:\n"+info, Toast.LENGTH_LONG).show();
 	}
 
 

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import nox.minesweeper.logic.Field;
 
 
-public class PlayActivity extends Activity
+public class PlayActivity extends Activity implements DialogInterface.OnClickListener
 {
 	private View     gameView;
 	private TextView infoText;
@@ -206,8 +206,8 @@ public class PlayActivity extends Activity
 					return true;
 
 
-				/* Check if the pointer is still referring the aimed position.
-				 * If not, cancel the edit.*/
+					/* Check if the pointer is still referring the aimed position.
+					 * If not, cancel the edit.*/
 				case MotionEvent.ACTION_MOVE:
 				case MotionEvent.ACTION_UP:
 				case MotionEvent.ACTION_POINTER_UP:
@@ -293,7 +293,7 @@ public class PlayActivity extends Activity
 
 			row = (int) (y / (cellSize + gap));
 			col = (int) (x / (cellSize + gap));
-			
+
 			index = row*game.field.getWidth() + col;
 
 			return (index<game.field.size()) ? index : -1;
@@ -363,7 +363,7 @@ public class PlayActivity extends Activity
 		}
 		catch (Exception e)
 		{
-			Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "RESUME: "+android.util.Log.getStackTraceString(e), Toast.LENGTH_LONG).show();
 		}
 
 		this.showInfo();
@@ -378,7 +378,10 @@ public class PlayActivity extends Activity
 		if (this.game==null)
 			return;
 
+		try{
 		this.game.pause(); // pause the current game.
+		if (this.game.isPaused()) Toast.makeText(this, this.game.getTime(Game.PLAYED_TIME)+"ms played.",Toast.LENGTH_LONG).show();
+		}catch (Exception e){Toast.makeText(this, "PAUSE: "+android.util.Log.getStackTraceString(e), Toast.LENGTH_LONG).show();}
 	}
 
 
@@ -424,7 +427,7 @@ public class PlayActivity extends Activity
 		}
 		catch (Game.NotStartedException e)
 		{
-			str = String.format(str, 0);
+			str = String.format(str, 0.);
 		}
 
 		this.timeText.setText(str);
@@ -442,32 +445,28 @@ public class PlayActivity extends Activity
 			return this.restartGame;
 		}
 
-		/*Dialog: Accept => Restart the game.*/
-		DialogInterface.OnClickListener listener;
-		listener = new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int button)
-			{
-				if (button != Dialog.BUTTON_POSITIVE)
-				{
-					return;
-				}
-
-				/*Restart the game and redraw the game view.*/
-				PlayActivity.this.game.restart();
-				PlayActivity.this.gameView.invalidate();
-				PlayActivity.this.showInfo();
-			}
-		};
-
 		/*Initate Dialog.*/
 		this.restartGame = new AlertDialog.Builder(this)
 			.setTitle(R.string.restart_game)
 			//.setMessage(R.string.restart_game_warning)
-			.setPositiveButton(R.string.accept, listener)
+			.setPositiveButton(R.string.accept, this)
 			.create();
 
 		return this.getRestartDialog();
+	}
+
+
+	@Override
+	public void onClick(DialogInterface dialog, int button)
+	{
+		if (button != Dialog.BUTTON_POSITIVE || this.game == null)
+		{
+			return;
+		}
+
+		/*Restart the game and redraw the game view.*/
+		this.game.restart();
+		this.gameView.invalidate();
+		this.showInfo();
 	}
 }
