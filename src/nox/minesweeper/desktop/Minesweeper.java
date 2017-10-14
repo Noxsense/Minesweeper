@@ -35,6 +35,8 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import nox.minesweeper.logic.Game;
+import nox.minesweeper.logic.Statistic;
 import nox.minesweeper.logic.Field;
 
 
@@ -55,19 +57,19 @@ public class Minesweeper extends JFrame implements ActionListener
 
 	private JPanel                    selectorView;
 	private JSlider                   hSlider, wSlider, mSlider;
-	private JList<GameField>          fieldSelector;
+	private JList<Game>               fieldSelector;
 
 	private JPanel                    gameView;
 	private JLabel                    timeLabel;
 	private JLabel                    gameLabel;
-	private GameField                 currGame;
+	private GameFieldAlt              gameField;
 	private JButton                   giveUpBtn;
 	private Timer                     gameTimer;
 
 	private JComponent                statsView;
 	private JComponent                prefView;
 
-	private ListModel<GameField>      fieldsModel; // known fields: size x mines
+	private ListModel<Game>           fieldsModel; // known fields: size x mines
 	private long                      markTime;
 	private int                       max;
 
@@ -96,7 +98,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			LabelsFiller.INSTANCE.fillLabels();
 		}
 
-		this.fieldsModel = new DefaultListModel<GameField>();
+		this.fieldsModel = new DefaultListModel<Game>();
 
 		this.setLayout(this.layout = new CardLayout()); // card layout.
 
@@ -135,7 +137,7 @@ public class Minesweeper extends JFrame implements ActionListener
 				break;
 
 			case "CREATE_GAME":
-				this.openGame(new GameField(
+				this.openGame(new Game(
 							hSlider.getValue(),
 							wSlider.getValue(),
 							mSlider.getValue()));
@@ -168,8 +170,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			case "FIELDS_EXPORT":
 				for (i=0; i<this.fieldsModel.getSize(); i++)
 				{
-					GameField f = this.fieldsModel.getElementAt(i);
-					System.out.println(f.allInformation());
+					Game f = this.fieldsModel.getElementAt(i);
 				}
 				break;
 
@@ -177,7 +178,10 @@ public class Minesweeper extends JFrame implements ActionListener
 				break;
 
 			default:
-				this.currGame.pause(); // pause game if running.
+				Game game = this.gameField.getGame();
+				if (game==null)
+					return;
+				game.pause(); // pause game if running.
 				break;
 		}
 	}
@@ -284,7 +288,7 @@ public class Minesweeper extends JFrame implements ActionListener
 					String name = e.getComponent().getName();
 					if (name != null && name.equals(Minesweeper.this.gameView.getName()))
 					{
-						GameField curr = Minesweeper.this.currGame;
+						Game curr = Minesweeper.this.gameField.getGame();
 						if (curr != null)
 						{
 							curr.pause();
@@ -296,9 +300,7 @@ public class Minesweeper extends JFrame implements ActionListener
 				{}
 
 				public void componentResized(ComponentEvent e)
-				{
-					Minesweeper.this.matchSizes();
-				}
+				{}
 
 				public void componentShown(ComponentEvent e)
 				{}
@@ -325,9 +327,12 @@ public class Minesweeper extends JFrame implements ActionListener
 			topPanel.add(this.giveUpBtn);
 			topPanel.add(this.timeLabel);
 
+			this.gameField = new GameFieldAlt();
+
 			this.gameView = new JPanel(new BorderLayout());
 			this.gameView.setOpaque(false); // transparent.
 			this.gameView.add(topPanel, BorderLayout.NORTH);
+			this.gameView.add(this.gameField, BorderLayout.CENTER);
 			this.gameView.addComponentListener(cl);
 			this.gameView.setName("VIEW_GAME");
 			this.add(this.gameView, this.gameView.getName());
@@ -364,7 +369,6 @@ public class Minesweeper extends JFrame implements ActionListener
 			pnl = new JPanel(new GridLayout(1,2));
 			pnl.setOpaque(false);
 			pnl.add(this.createCreator()); //initated sliders
-			//pnl.add(this.createSelector()); // iniate list
 
 			this.selectorView.add(lbl, BorderLayout.NORTH);
 			this.selectorView.add(pnl);
@@ -405,7 +409,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			this.add(this.statsView, this.statsView.getName());
 		}
 
-		GameField g;
+		Game g;
 		String s     = "";
 		String t     ="%.3f s";
 		double milli = 1E-3;
@@ -418,11 +422,11 @@ public class Minesweeper extends JFrame implements ActionListener
 			s += String.format(
 					ls.get("TABLE_STATS"),
 					g.toString(),
-					g.countGames(false),
-					(won=g.countGames(true)),
-					g.winStreak(),
-					(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(false)*milli)),
-					(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(true)*milli))
+					-1, //g.countGames(false),
+					-1, //(won=g.countGames(true)),
+					-1, //g.winStreak(),
+					"Miep", //(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(false)*milli)),
+					"Miep" //(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(true)*milli))
 					);
 		}
 
@@ -451,20 +455,21 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	protected void updateGameLabel()
 	{
-		if (this.gameLabel == null)
+		if (this.gameLabel == null || this.gameField == null)
 		{
 			this.gameLabel = new JLabel();
 			this.gameView.add(this.gameLabel, BorderLayout.NORTH);
 		}
 
-		if (this.currGame == null)
+		Game  game;
+		if ((game=this.gameField.getGame()) == null)
 		{
 			this.gameLabel.setText("");
 			return;
 		}
 
 		String state;
-		state = this.currGame.getMines(false)+"/"+this.currGame.getMines(true);
+		state = game.field.getMarked()+"/"+game.field.getMines();
 		
 		this.gameLabel.setText(state);
 		this.showGameTime();
@@ -476,15 +481,21 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	private void showGameTime()
 	{
-		if (this.currGame == null || !this.currGame.isRunning()
-				|| !this.currView.equals(this.gameView.getName()))
+		if (!this.currView.equals(this.gameView.getName()))
+		{
+			return;
+		}
+
+		Game game = this.gameField.getGame();
+
+		if (game == null || !game.isRunning())
 		{
 			return;
 		}
 
 
 		String f = "%.2f s";
-		double played = this.currGame.playedTime() * 1E-9;
+		double played = game.getTime(Game.PLAYED_TIME) * 1E-9;
 		this.timeLabel.setText(String.format(f, played));
 	}
 
@@ -494,12 +505,15 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	private void restartCurrent()
 	{
-		if (this.currGame == null)
+		Game game = this.gameField.getGame();
+
+		if (game == null)
 		{
 			return;
 		}
 
-		this.currGame.restart();
+		game.restart();
+		this.gameField.repaint();
 	}
 
 
@@ -507,7 +521,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	 * Open a game as currGame.
 	 * @param game 
 	 */
-	private void openGame(GameField game)
+	private void openGame(Game game)
 	{
 		if (game == null) // back to home view.
 		{
@@ -517,15 +531,8 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		this.showGame();
 
-		try // try to reset the current game view.
-		{
-			this.gameView.remove(this.currGame);
-		}
-		catch (NullPointerException e)
-		{}
-
-		DefaultListModel<GameField> fieldsM;
-		fieldsM = (DefaultListModel<GameField>) this.fieldsModel;
+		DefaultListModel<Game> fieldsM;
+		fieldsM = (DefaultListModel<Game>) this.fieldsModel;
 
 		if (fieldsM.contains(game)) // use known field.
 		{
@@ -540,48 +547,18 @@ public class Minesweeper extends JFrame implements ActionListener
 				.add(this.createSelector());
 		}
 
-		this.currGame = game;
-		this.currGame.setHost(this);
-		this.gameView.add(this.currGame, BorderLayout.CENTER);
+		this.gameField.openGame(game);
 
 		this.updateGameLabel();
 		this.gameTimer.start();
 
-		if (this.currGame.isRunning()) // don't wait for click to resume.
+		if (this.gameField.getGame().isRunning()) // don't wait for click to resume.
 		{
-			this.currGame.resume();
+			this.gameField.getGame().resume();
 		}
 
 		this.revalidate();
 		this.repaint();
-	}
-
-
-	/**
-	 * If a game is showed, try to match this frame to game field.
-	 * The positions have to be squares.
-	 */
-	private void matchSizes()
-	{
-		if (this.currGame==null || this.gameView==null || !this.gameView.getName().equals(this.currView))
-		{
-			return;
-		}
-
-		Dimension posSize = this.currGame.getPosSize();
-
-		if (posSize.width == posSize.height)
-		{
-			return;
-		}
-
-		GridLayout layout = (GridLayout) ((JPanel)this.currGame).getLayout();
-
-		int pos = (posSize.width + posSize.height)/2;
-		int w   = layout.getColumns()*pos - this.currGame.getWidth();
-		int h   = layout.getRows()   *pos - this.currGame.getHeight();
-
-		this.setBounds(this.getX(), this.getY(), this.getWidth()+w, this.getHeight()+h);
 	}
 
 
@@ -695,7 +672,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	private JPanel createSelector()
 	{
-		this.fieldSelector = new JList<GameField>(this.fieldsModel);
+		this.fieldSelector = new JList<Game>(this.fieldsModel);
 		this.fieldSelector.setLayoutOrientation(JList.VERTICAL);
 
 		JScrollPane lstScoller = new JScrollPane(this.fieldSelector);
