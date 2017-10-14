@@ -141,6 +141,16 @@ public class Statistic
 
 
 	/**
+	 * Get streak of the statistics.
+	 * @return streak as int.
+	 */
+	public int getStreak()
+	{
+		return this.streak;
+	}
+
+
+	/**
 	 * Get the count of all games: #lost+ #won.
 	 * @return #lost + #won as int.
 	 */

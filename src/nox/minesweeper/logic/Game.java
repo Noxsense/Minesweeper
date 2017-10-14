@@ -147,10 +147,10 @@ public class Game
 	 */
 	public void restart()
 	{
-		/*Nothing to do: Game is not finished yet.*/
+		/*Game is not finished yet: Try to reveal mines and restart.*/
 		if (this.isRunning())
 		{
-			return;
+			this.reveal();
 		}
 
 		this.field.fillMines(new int[0]); // fill with no mine == clear
