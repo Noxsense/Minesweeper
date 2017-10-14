@@ -26,6 +26,7 @@ class GameField extends Canvas implements MouseListener
 	private final static int CHAR_MARK  = 10;
 	private final static int CHAR_CLOSE = 11;
 
+	private Minesweeper host;
 	private Game game;
 
 	private long markTime;
@@ -41,9 +42,15 @@ class GameField extends Canvas implements MouseListener
 	/**
 	 * Initate a new GameField.
 	 */
-	public GameField()
+	public GameField(Minesweeper host) throws NullPointerException
 	{
 		super();
+		this.host = host;
+		if (this.host==null)
+		{
+			throw new NullPointerException("Host is null");
+		}
+
 		this.setBackground(null);
 		this.addMouseListener(this);
 
@@ -79,6 +86,7 @@ class GameField extends Canvas implements MouseListener
 	public void openGame(Game g)
 	{
 		this.game = g;
+		this.setGiveUpButton();
 	}
 
 
@@ -207,10 +215,10 @@ class GameField extends Canvas implements MouseListener
 					continue;
 			}
 
-			graphics.drawRoundRect(point.x, point.y, cellSize, cellSize, arc, arc);
+			graphics.drawRoundRect(point.x, point.y, size, size, arc, arc);
 
-			point.y = point.y+(cellSize+textHeight)/2;       // y center of cell
-			point.x = point.x+(cellSize-cellTextWidth[mines])/2; // x center of cell
+			point.y = point.y+(size+textHeight)/2;       // y center of cell
+			point.x = point.x+(size-cellTextWidth[mines])/2; // x center of cell
 			graphics.drawChars(this.posChar, mines, 1, point.x, point.y);
 		}
 	}
@@ -323,6 +331,10 @@ class GameField extends Canvas implements MouseListener
 
 		/*... or open.*/
 		this.game.open(this.aimedFieldPos);
+
+
+		this.setGiveUpButton();
+
 		this.resetMouseClick();
 		this.repaint();
 	}
@@ -333,8 +345,25 @@ class GameField extends Canvas implements MouseListener
 	 */
 	private void resetMouseClick()
 	{
+		this.host.updateGameLabel();
 		this.mouseClickStarted = Long.MAX_VALUE;
 		this.aimedFieldPos     = -1;
+	}
+
+
+	/**
+	 * Set the give up button.
+	 */
+	private void setGiveUpButton()
+	{
+		if (this.game!=null && this.game.field.isWon())
+		{
+			this.host.getGiveUpButton().setText(":)");
+			this.host.getGiveUpButton().setToolTipText("Start a new Game");
+		}
+
+		this.host.getGiveUpButton().setText(":(");
+		this.host.getGiveUpButton().setToolTipText("This will end this game automatically.");
 	}
 
 

@@ -62,7 +62,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	private JPanel                    gameView;
 	private JLabel                    timeLabel;
 	private JLabel                    gameLabel;
-	private GameField              gameField;
+	private GameField                 gameField;
 	private JButton                   giveUpBtn;
 	private Timer                     gameTimer;
 
@@ -327,7 +327,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			topPanel.add(this.giveUpBtn);
 			topPanel.add(this.timeLabel);
 
-			this.gameField = new GameField();
+			this.gameField = new GameField(this);
 
 			this.gameView = new JPanel(new BorderLayout());
 			this.gameView.setOpaque(false); // transparent.
@@ -410,6 +410,7 @@ public class Minesweeper extends JFrame implements ActionListener
 		}
 
 		Game g;
+		Statistic stats;
 		String s     = "";
 		String t     ="%.3f s";
 		double milli = 1E-3;
@@ -417,16 +418,17 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		for (int i=0; i<this.fieldsModel.getSize(); i++)
 		{
-			g       = this.fieldsModel.getElementAt(i);
+			g     = this.fieldsModel.getElementAt(i);
+			stats = g.getStatistics();
 
 			s += String.format(
 					ls.get("TABLE_STATS"),
 					g.toString(),
-					-1, //g.countGames(false),
-					-1, //(won=g.countGames(true)),
-					-1, //g.winStreak(),
-					"Miep", //(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(false)*milli)),
-					"Miep" //(won< 1) ? "Nothing won!" : String.format(t, (g.getTime(true)*milli))
+					stats.countGamesWon(false),
+					(won=stats.countGamesWon(true)),
+					stats.getStreak(),
+					(won< 1) ? "Nothing won!" : String.format(t,(stats.getTime(Statistic.BEST_TIME)*milli)),
+					(won< 1) ? "Nothing won!" : String.format(t,(stats.getTime(Statistic.AVERAGE_TIME)*milli))
 					);
 		}
 
@@ -455,7 +457,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	protected void updateGameLabel()
 	{
-		if (this.gameLabel == null || this.gameField == null)
+		if (this.gameLabel == null)
 		{
 			this.gameLabel = new JLabel();
 			this.gameView.add(this.gameLabel, BorderLayout.NORTH);
@@ -549,7 +551,6 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		this.gameField.openGame(game);
 
-		this.updateGameLabel();
 		this.gameTimer.start();
 
 		if (this.gameField.getGame().isRunning()) // don't wait for click to resume.
@@ -557,6 +558,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			this.gameField.getGame().resume();
 		}
 
+		this.updateGameLabel();
 		this.revalidate();
 		this.repaint();
 	}
