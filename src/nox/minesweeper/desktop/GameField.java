@@ -1,662 +1,365 @@
 package nox.minesweeper.desktop;
 
 
+import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.*;
 
-import nox.minesweeper.logic.Field;
+
+import nox.minesweeper.logic.*;
+
 
 
 /**
  * Class GameField.
- * Contains field with mines and measures the played time.
- * Shouldn't be public.
+ * Graphical representation for games.
  */
-class GameField extends JPanel implements MouseListener
+class GameField extends Canvas implements MouseListener
 {
-	// gui attributes and statics.
-	protected final static String INDICATOR = "Minesweeper.GameField.";
-	private final static Border[] colBorder = new Border[]
-	{
-		null // noo border, if no mines are near.
-			,BorderFactory.createLineBorder(new Color(0, 255, 171), 1)
-			,BorderFactory.createLineBorder(new Color(0, 255, 14),  2)
-			,BorderFactory.createLineBorder(new Color(143, 255, 0), 3)
-			,BorderFactory.createLineBorder(new Color(255, 210, 0), 4)
-			,BorderFactory.createLineBorder(new Color(255, 0, 103), 5)
-			,BorderFactory.createLineBorder(new Color(250, 0, 255), 6)
-			,BorderFactory.createLineBorder(new Color(93, 0, 255),  7)
-			,BorderFactory.createLineBorder(new Color(0, 64, 255),  8)
-	};
+	private final static long MARK_TIME_MIN = 10;
 
-	// key attributes
-	private Field         field;
-	private JLabel[]      posView;
-	private int           hiddenMines;
+	private final static int CHAR_MINE  = 9;
+	private final static int CHAR_MARK  = 10;
+	private final static int CHAR_CLOSE = 11;
 
-	// game (history) attributes
-	private int           gamesLost;
-	private int           gamesWon;
-	private int           winStreak;
-	private long          avgTime;
-	private long          bestTime;
+	private Game game;
 
-	// current game attributes
-	private long          gameTime;
-	private boolean       initiated, paused;
-	private long          clickStarted;
-	private boolean       posLoaded;
+	private long markTime;
+	private long mouseClickStarted;
+	private int  aimedFieldPos;
 
-	// additional gui attributes
-	private Minesweeper   host;
-
+	private char[]  posChar;
+	private Color[] colours;
+	private Color   colourClosed;
+	private int     cellSize;
+	private int     cellGap;
 
 	/**
-	 * Initate a new GameField with a matching field.
-	 * @param height field dimension
-	 * @param width  field dimension
-	 * @param n      mines count
+	 * Initate a new GameField.
 	 */
-	public GameField(int height, int width, int n) throws ArrayIndexOutOfBoundsException
+	public GameField()
 	{
-		this.field = new Field(height, width);
-		this.setLayout(new GridLayout(height,width));
-		this.setBorder(null);
-		this.initiatePositions();
+		super();
+		this.setBackground(null);
+		this.addMouseListener(this);
 
-		this.hiddenMines = (n<1||this.field.size()<=n) ? 1 : n;
+		this.setCellSize(30);
+		this.setCellGap(-1);
+		this.setMarkTime(200);
+		
+		this.posChar = new char[12];
+		this.posChar[0]         = Field.getDisplay(Field.DISPLAY_ZERO);
+		this.posChar[CHAR_MINE] = Field.getDisplay(Field.DISPLAY_MINE);
+		this.posChar[CHAR_MARK] = Field.getDisplay(Field.DISPLAY_MARKED);
+		this.posChar[CHAR_CLOSE] = Field.getDisplay(Field.DISPLAY_CLOSED);
 
-		this.gameTime = -1; // neigther playerd nor started
-		this.setOpaque(false);
+		this.colourClosed = new Color(0,0,0);
 
-		this.clickStarted = Long.MAX_VALUE;
-		this.initiated    = false;
-		this.paused       = true;
+		this.colours = new Color[9];
 
-		this.bestTime     = Long.MAX_VALUE;
-		this.gamesLost    = 0;
-		this.gamesWon     = 0;
+		for (int mines=0; mines<colours.length; mines++)
+		{
+			this.colours[mines] = new Color(0, 0, 0, 255/colours.length*mines);
+			
+			if (mines==0) continue; // skip zero
+
+			this.posChar[mines] = (char) (48+mines);
+		}
 	}
 
 
 	/**
-	 * Get the Minesweeper (extending JFrame) where this Field is hosted.
-	 * @return host as Minesweeper
+	 * Set the current Game for this GameField.
+	 * @param g new Game value to set.
 	 */
-	public Minesweeper getHost()
+	public void openGame(Game g)
 	{
-		return this.host;
+		this.game = g;
 	}
 
 
 	/**
-	 * Set the Minesweeper host (may be null?).
-	 * @param h new host
+	 * Get the current Game of this GameField.
+	 * @return current game as Game.
 	 */
-	public void setHost(Minesweeper h)
+	public Game getGame()
 	{
-		this.host = h;
+		return this.game;
 	}
 
 
 	/**
-	 * Initiate (or reset) the buttons.
+	 * Set the mark time (for toggle).
+	 * @param markTime new mark time, at least minimum.
 	 */
-	private void initiatePositions()
+	public void setMarkTime(long markTime)
 	{
-		Color     colour;
-		Border    border;
-
-		colour = new Color(230,230,230);
-		border = BorderFactory.createLineBorder(colour);
-		colour = new Color(240,240,240);
-
-		if (this.posView == null) // initatiate
-		{
-			this.posView  = new JLabel[this.field.size()];
-		}
-
-		for (int i=0; i<posView.length; i++) // reset views
-		{
-			if (this.posView[i] == null)
-			{
-				this.posView[i] = new JLabel("", JLabel.CENTER);
-				this.posView[i].addMouseListener(this);
-				this.posView[i].revalidate();
-				this.posView[i].setName(""+i);
-				this.add(this.posView[i]);
-			}
-
-			this.posView[i].setBackground(colour);
-			this.posView[i].setBorder(border);
-			this.posView[i].setEnabled(true);
-			this.posView[i].setForeground(new Color(100,100,100));
-			this.posView[i].setOpaque(true);
-			this.posView[i].setText("");
-			this.posView[i].revalidate();
-			this.posView[i].repaint();
-		}
-
-		this.posLoaded = true; // mark as (re)loaded
+		this.markTime = (markTime < MARK_TIME_MIN) ? MARK_TIME_MIN : markTime;
+	}
 
 
-		if (host==null) // no host
-		{
-			return;
-		}
+	/**
+	 * Set new size of one cell (square).
+	 * @param size new size value, at least 1.
+	 */
+	public void setCellSize(int size)
+	{
+		this.cellSize = (size<1) ? 1 : size;
+	}
 
-		JButton giveUpBtn = host.getGiveUpButton();
-		if (giveUpBtn != null)
-		{
-			giveUpBtn.setText(":(");
-			giveUpBtn.setToolTipText("This will end this game automatically.");
-		}
+
+	/**
+	 * Get the size of one cell (square).
+	 * @return side length of once cell.
+	 */
+	public int getCellSize()
+	{
+		return this.cellSize;
+	}
+
+
+	/**
+	 * Set Gap value between cells.
+	 * @param gap new gap.
+	 */
+	public void setCellGap(int gap)
+	{
+		this.cellGap = (gap<0) ? -1 : cellGap;
+	}
+
+
+	
+	/**
+	 * Get the Gap between to cells.
+	 * If gap less than 0, the gap will be depend on the cell size.
+	 * @return gap between as int.
+	 */
+	public int getCellGap()
+	{
+		return (this.cellGap < 0)
+			? this.getCellSize()/5
+			: this.cellGap;
 	}
 
 
 	@Override
-	public Dimension getPreferredSize()
+	public void paint(Graphics graphics)
 	{
-		Dimension d  = super.getPreferredSize();
-		d.width      = Minesweeper.POS_SCALE * this.field.getWidth();
-		d.height     = Minesweeper.POS_SCALE * this.field.getHeight();
-		return d;
-	}
-
-
-	/**
-	 * Get the dimension of a Pos in this GameField.
-	 * @return size as Dimension.
-	 */
-	protected Dimension getPosSize()
-	{
-		return (posView.length<1) ? new Dimension() : posView[0].getSize();
-	}
-
-
-	/**
-	 * Get the relation the Width should have to the height.
-	 * @return wanted width/height as double.
-	 */
-	protected double getWidthToHeight()
-	{
-		return this.field.getWidth()*1./this.field.getHeight();
-	}
-
-
-	/**
-	 * Restart the game on this field.
-	 * If currently playing, then this will be lost.
-	 */
-	public void restart()
-	{
-		if (initiated)
+		if (this.game == null)
 		{
-			this.endGame();
+			super.paint(graphics);
+			return;
 		}
 
-		this.initiatePositions();
-		this.initiated = false;
-	}
-
-
-	/**
-	 * Check if the field is currently playing.
-	 * @return true, if a game was initated and not won/lost yet.
-	 */
-	public boolean isRunning()
-	{
-		return this.initiated
-			&& (!this.field.isLost() && !this.field.isWon());
-	}
-
-
-	/**
-	 * Force to end: Set this game as lost  and reveal all mines.
-	 */
-	public void endGame()
-	{
-		for (int index : this.field.reveal()) // show mines
+		if (graphics == null)
 		{
-			if (this.field.getState(index) == Field.State.MARKED)
+			return;
+		}
+
+		FontMetrics fm;
+		int         size, arc, gap, textHeight, textWidth;
+
+		size       = this.getCellSize();
+		gap        = this.getCellGap();
+		arc        = 2;
+		fm         = graphics.getFontMetrics();
+		textHeight = fm.getAscent();
+
+		int[] cellTextWidth = new int[this.posChar.length];
+
+		for (int i=1; i<posChar.length; i++)
+		{
+			cellTextWidth[i] = fm.charWidth(this.posChar[i]);
+		}
+
+		for (int i=0; i<this.game.field.size(); i++)
+		{
+			Point point = this.index2Point(i);
+			int   mines = this.game.field.onPosition(i);
+
+			graphics.setColor(this.colourClosed);
+
+			switch (mines)
 			{
-				this.posView[index].setBackground(Color.YELLOW);
-				continue;
+				case Field.VALUE_CLOSED:
+					mines = CHAR_CLOSE;
+					break;
+
+				case Field.VALUE_MINE_ON_POS:
+					mines = CHAR_MINE;
+					break;
+
+				case Field.VALUE_MARKED:
+					mines = CHAR_MARK;
+					break;
+
+				case 0:
+				case 1:case 2:case 3:case 4:
+				case 5:case 6:case 7:case 8:
+					graphics.setColor(this.colours[mines]);
+					break;
+
+				default: // error?
+					continue;
 			}
-			this.posView[index].setText("X");
-			this.posView[index].setBackground(Color.BLACK);
-			this.posView[index].setForeground(Color.WHITE);
+
+			graphics.drawRoundRect(point.x, point.y, cellSize, cellSize, arc, arc);
+
+			point.y = point.y+(cellSize+textHeight)/2;       // y center of cell
+			point.x = point.x+(cellSize-cellTextWidth[mines])/2; // x center of cell
+			graphics.drawChars(this.posChar, mines, 1, point.x, point.y);
 		}
-
-		this.gamesLost += 1;
-		this.winStreak = 0;
-		this.posLoaded = false;
 	}
 
 
 	/**
-	 * Get the count of hidden mines or as mine marked mine.
-	 * @param  real true: hidden mines, else as mine marked.
-	 * @return #mines or #marked
+	 * Translate the given index in this game.field to 2D Point.
+	 * @param index    in field.
+	 * @param cellSize cell size.
+	 * @param gap      gap between cells.
+	 * @return         point with coordinates for cell root.
 	 */
-	public int getMines(boolean real)
+	private Point index2Point(int index)
 	{
-		return (real) ? this.field.getMines() : this.field.getMarked();
+		if (this.game == null)
+			return null;
+
+		int size = this.getCellSize();
+		int gap  = this.getCellGap();
+
+		int y = (index/this.game.field.getWidth())*(size + gap); // row
+		int x = (index%this.game.field.getWidth())*(size + gap); // column
+
+		return new Point(x, y);
 	}
 
 
 	/**
-	 * Get the current win streak: Sequence of won games.
-	 * @return win streak as int.
+	 * Get the game field index for the given point.
+	 * @param p point.
+	 * @return index if field.position was hit, else -1
 	 */
-	public int winStreak()
+	private int point2Index(Point p)
 	{
-		return this.winStreak;
-	}
-
-
-	/**
-	 * Get the count of games, which were won with this field.
-	 * @param won get #won games (or #lost)
-	 * @return count as int.
-	 */
-	public int countGames(boolean won)
-	{
-		return (won) ? this.gamesWon : this.gamesLost;
-	}
-
-
-	/**
-	 * Get the best time (or average time).
-	 * @param  best time (or aerage time if false).
-	 * @return best time (or average) as long.
-	 */
-	public long getTime(boolean best)
-	{
-		return (best) ? this.bestTime : this.avgTime;
-	}
-
-
-	/**
-	 * Pause the game.
-	 * Resumable with current state.
-	 */
-	public void pause()
-	{
-		if (paused) // already paused.
+		if (p==null || this.game==null)
 		{
-			return;
+			return -1;
 		}
 
-		this.gameTime = this.playedTime(); // store play in start.
-		this.paused   = true;
+		int offset = this.getCellSize()+this.getCellGap();
+
+		return p.y/(offset)*this.game.field.getWidth() + p.x/(offset);
 	}
 
 
-	/**
-	 * Resume a paused Game.
-	 */
-	public void resume()
+	@Override
+	public void mouseEntered(MouseEvent e)
 	{
-		if (!paused) // is not paused yet/anymore.
-		{
-			return;
-		}
-
-		this.gameTime = this.startTime();
-		this.paused   = false;
 	}
 
 
-	/**
-	 * Get the time, the current game may have started (to have the given play time).
-	 * If paused, gameTime stores played time.
-	 * @return time (nanoseconds) as long
-	 */
-	public long startTime()
+	@Override
+	public void mouseExited(MouseEvent e)
 	{
-		return (paused) ? System.nanoTime()-this.gameTime : this.gameTime;
 	}
 
 
-	/**
-	 * Get the time, the current game is currently played.
-	 * If paused, played gameTime stores in start time.
-	 * @return time (nanoseconds) as long
-	 */
-	public long playedTime()
+
+	@Override
+	public void mousePressed(MouseEvent e)
 	{
-		return (paused) ? this.gameTime : System.nanoTime()-this.gameTime;
+		this.mouseClickStarted = GameField.now();
+
+		if (e==null) return;
+
+		this.aimedFieldPos = this.point2Index(e.getPoint());
 	}
 
 
-	/**
-	 * Set games count for won or lost.
-	 * @param n   new count.
-	 * @param won set won or lost.
-	 */
-	protected void setGames(int n, boolean won)
+	@Override
+	public void mouseReleased(MouseEvent e)
 	{
-		if (won) this.gamesWon  = (n<0) ? 0 : n;
-		else     this.gamesLost = (n<0) ? 0 : n;
-	}
-
-
-	/**
-	 * Set the times for the games, average or best time.
-	 * @param t    new time score.
-	 * @param best set t as best time (or as average time).
-	 */
-	protected void setTimes(long t, boolean best)
-	{
-		if (best) this.bestTime = (t<0) ? 0 : t;
-		else      this.avgTime  = (t<0) ? 0 : t;
-	}
-
-
-	/**
-	 * Set the streak for wins in sequence.
-	 * @param n count of wins.
-	 */
-	protected void setStreak(int n)
-	{
-		this.winStreak = (n<0) ? 0 : n;
-	}
-
-
-	/**
-	 * Set new best time and average time and add a new win.
-	 * @param end time.
-	 */
-	private void updateWin(long now)
-	{
-		if (!this.field.isWon() || now < 0) // safety check
-		{
-			return;
-		}
-
-		long played;
-		played = now - this.gameTime;   // in nano seconds.
-		played = (long) (played*1E-6);  // in milli seconds.
-
-
-		this.bestTime   = (played<this.bestTime) ? played : this.bestTime;
-		this.gamesWon  += 1;
-		this.winStreak += 1;
-		this.avgTime    = (this.avgTime*(gamesWon-1) + played)/gamesWon;
-
-		this.initiated  = false; // new game hasn't started yet.
-		this.gameTime   = -1;
-
-		this.posLoaded  = false;
-
-
-		if (host==null) // no host => skip
-		{
-			return;
-		}
-
-		JButton giveUpBtn = host.getGiveUpButton();
-		if (giveUpBtn != null)
-		{
-			giveUpBtn.setText(":)");
-			giveUpBtn.setToolTipText("Start a new game.");
-		}
-
-		host.updateGameLabel(); // update label.
-	}
-
-
-	/**
-	 * Graphical representation of opening a field's position.
-	 * @param i position to open.
-	 */
-	private void open(int i)
-	{
-		long  now    = System.nanoTime();
-		int[] opened = this.field.open(i);
-
-		for (int index : opened) // display all opened positions
-		{
-			this.show(index);
-		}
-
-		if (this.field.isLost()) // "force to lost"
-		{
-			this.endGame();
-		}
-
-		else if (this.field.isWon()) // update a new win now
-		{
-			this.updateWin(System.nanoTime());
-		}
-	}
-
-
-	/**
-	 * Graphical representation of one position with its posView.
-	 * @param i position to show.
-	 */
-	private void show(int i)
-	{
-		switch (this.field.getState(i)) // not open: just toggle mark.
-		{
-			case CLOSED:
-				this.posView[i].setText("");
-				return; // do nothing
-
-			case MARKED:
-				String str = "<html><font color=\"red\"><b>?</b></font></html>";
-				this.posView[i].setText(str);
-				return;
-
-			default: break;
-		}
-
-		int    mines = this.field.onPosition(i);
-		String str   = "<html><font color=\"rgb(100,100,100)\">X</font></html>";
-
-		this.posView[i].setOpaque(9 < mines); // if mine: fill black.
-
-		if (0<=mines && mines < 9) // open without mine.
-		{
-			str = (mines<1) ? "" : str.replaceAll("X", ""+mines);
-			this.posView[i].setBorder(GameField.colBorder[mines]);
-		}
-		else // this is a mine.
-		{
-			this.posView[i].setBackground(Color.BLACK);
-			this.posView[i].setForeground(Color.WHITE);
-		}
-
-		this.posView[i].setText(str);
-		this.posView[i].revalidate();
-		this.posView[i].repaint();
 	}
 
 
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		Object src = e.getSource();
+		long clickTime  = GameField.now() - this.mouseClickStarted;
 
-		// as play time
-		clickStarted = System.currentTimeMillis() - this.clickStarted;
-
-		// not if game is ended.
-		if (e==null || !this.posLoaded || src==null || !(src instanceof JComponent))
+		/*Invalid input.*/
+		if (clickTime<0 || e == null || this.game == null)
 		{
-			this.clickStarted = Long.MAX_VALUE;
+			this.resetMouseClick();
 			return;
 		}
 
-		boolean mark = host!=null  && host.getMarkTime() <= clickStarted
-			|| e.getButton() != MouseEvent.BUTTON1;
-
-		this.clickStarted = Long.MAX_VALUE; // reset
-
-		/*To open position with index as name*/
-		int i = Integer.parseInt(((JComponent)src).getName()); // index by name
-
-		if (!this.initiated) // starting game.
+		if (this.aimedFieldPos<0 || this.game.field.size()<= this.aimedFieldPos)
 		{
-			/*Set start time and fill all except current.*/
-			this.paused   = false;
-			this.gameTime = System.nanoTime();
-			this.field.fillRandomly(this.hiddenMines, i);
+			return;
 		}
 
-		this.resume(); // doesn't do anything, if not paused.
-		this.initiated = true;
-		this.paused    = false;
+		int  currentAim = this.point2Index(e.getPoint());
 
-		if (mark) this.field.toggleMark(i);
-		else      this.open(i);
-
-		this.show(i); // display, doesn't have to reveal.
-
-		if (this.host!=null) // update host's game label
+		/*Goal changed.*/
+		if (this.aimedFieldPos != currentAim)
 		{
-			this.host.updateGameLabel();
+			this.resetMouseClick();
+			return;
 		}
 
-		this.revalidate();
+		/*Check toggle...*/
+		if (this.isToggleMarkEvent(e, clickTime))
+		{
+			this.game.toggleMark(this.aimedFieldPos);
+			this.resetMouseClick();
+			this.repaint();
+			return;
+		}
+
+		/*... or open.*/
+		this.game.open(this.aimedFieldPos);
+		this.resetMouseClick();
 		this.repaint();
 	}
 
 
-	@Override
-	public void mousePressed(MouseEvent e)
+	/**
+	 * Reset the mouse click event like time or aimed position.
+	 */
+	private void resetMouseClick()
 	{
-		// start measssuring click time, eg. for marking time.
-		this.clickStarted = System.currentTimeMillis();
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e)
-	{}
-
-	@Override
-	public void mouseEntered(MouseEvent e) // just hovering
-	{}
-
-	@Override
-	public void mouseExited(MouseEvent e) // just hovering
-	{}
-
-
-	@Override
-	public String toString()
-	{
-		String f = "GameField: %d:%d (%d)%s";
-		return String.format(f
-				,  this.field.getWidth(), this.field.getHeight() // dimension
-				,  this.hiddenMines                              // minescount
-				, ((this.isRunning()) ? " RUNNING" : "")
-				);
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return this.field.hashCode();
-	}
-
-
-	@Override
-	public boolean equals(Object o)
-	{
-		return o!=null && o instanceof GameField
-			&& this.field.equals(((GameField)o).field)
-			&& this.hiddenMines == ((GameField)o).hiddenMines
-			;
+		this.mouseClickStarted = Long.MAX_VALUE;
+		this.aimedFieldPos     = -1;
 	}
 
 
 	/**
-	 * Get the current field information into a String.
-	 * The current game isn't saved here.
-	 *   field.width
-	 *   field.height
-	 *   hiddenMines
-	 *   gamesLost
-	 *   gamesWon
-	 *   winStreak
-	 *   avgTime
-	 *   bestTime
-	 * @return String with dimension, mine count, and other data.
+	 * Check if the current imput is fitting the conditions of toggling marks.
+	 * @param e MouseEvent.
+	 * @param clickTime Time the mouse was pressedn.
+	 * @return true, if mousetime or buttons are ok.
 	 */
-	public String allInformation()
+	private boolean isToggleMarkEvent(MouseEvent e, long clickTime)
 	{
-		return GameField.INDICATOR
-			+  this.field.getWidth()
-			+":"+  this.field.getHeight()
-			+":"+  this.hiddenMines
-			+":"+  this.gamesLost
-			+":"+  this.gamesWon
-			+":"+  this.winStreak
-			+":"+  this.avgTime
-			+":"+  this.bestTime
-			;
+		return e!=null
+			&& (
+					this.markTime <= clickTime ||
+					e.getButton() != MouseEvent.BUTTON1
+			   );
 	}
 
 
 	/**
-	 * Try to parse a GameField.
-	 * with GameField.allInformation() : String
-	 * @param str String with GameField data.
-	 * @return parsed as GameField
-	 * @throws NullPointerException 
-	 * @throws NumberFormatException 
+	 * Keep uniform time unit for this representation.
+	 * @return current time (milli seconds) in long.
 	 */
-	protected static GameField parseGameField(String str) throws NullPointerException, NumberFormatException
+	protected static long now()
 	{
-		str = str.trim();
-		if (!str.startsWith(GameField.INDICATOR))
-		{
-			throw new NullPointerException("Invalid Format for GameField.");
-		}
-
-		String[] no;
-		no = str.substring(GameField.INDICATOR.length(), str.length()).split(":");
-
-		if (no.length != 8)
-		{
-			throw new NullPointerException("Attribute size invalid.");
-		}
-
-		int width, height, mines, lost, won, streak;
-		long avgTime, bestTime;
-
-		width  = Integer.parseInt(no[0]);
-		height = Integer.parseInt(no[1]);
-		mines  = Integer.parseInt(no[2]);
-		lost   = Integer.parseInt(no[3]);
-		won    = Integer.parseInt(no[4]);
-		streak = Integer.parseInt(no[5]);
-
-		avgTime  = Long.parseLong(no[6]);
-		bestTime = Long.parseLong(no[7]);
-
-		GameField parsed = new GameField(height, width, mines);
-
-		parsed.setGames(lost,     false);
-		parsed.setGames(won,      true);
-		parsed.setTimes(bestTime, true);
-		parsed.setTimes(avgTime,  true);
-		parsed.setStreak(streak);
-
-		//fs.add(0, parsed);
-		return parsed;
+		return System.currentTimeMillis();
 	}
 }

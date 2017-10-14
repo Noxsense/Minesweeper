@@ -62,7 +62,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	private JPanel                    gameView;
 	private JLabel                    timeLabel;
 	private JLabel                    gameLabel;
-	private GameFieldAlt              gameField;
+	private GameField              gameField;
 	private JButton                   giveUpBtn;
 	private Timer                     gameTimer;
 
@@ -327,7 +327,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			topPanel.add(this.giveUpBtn);
 			topPanel.add(this.timeLabel);
 
-			this.gameField = new GameFieldAlt();
+			this.gameField = new GameField();
 
 			this.gameView = new JPanel(new BorderLayout());
 			this.gameView.setOpaque(false); // transparent.
