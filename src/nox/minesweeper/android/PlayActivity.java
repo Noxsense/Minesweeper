@@ -236,8 +236,14 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 						return true;
 					}
 
-					// do sth with cell
-					game.open(cell);
+					if (this.isToggleMarkEvent(e)) // toggle
+					{
+						game.toggleMark(cell);
+					}
+					else // open
+					{
+						game.open(cell);
+					}
 
 					this.invalidate();
 					PlayActivity.this.showInfo();
@@ -249,6 +255,18 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			}
 
 			return true;
+		}
+
+
+		/**
+		 * Check if the given mouse event was a toggle action.
+		 * @param e MouseEvent
+		 * @return true, if the action should be toggle.
+		 */
+		private boolean isToggleMarkEvent(MotionEvent e)
+		{
+			return e != null
+				&& false;
 		}
 
 
