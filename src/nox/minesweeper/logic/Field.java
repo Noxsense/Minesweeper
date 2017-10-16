@@ -710,7 +710,12 @@ public class Field
 
 		for (int mine : mineIndices)
 		{
-			this.get(mine).setMine(true);
+			Position pos = this.get(mine);
+
+			if (pos.isMine())
+				continue;
+
+			pos.setMine(true);
 			this.minesCnt[0] += 1;
 		}
 	}
@@ -972,6 +977,7 @@ public class Field
 	 * height width [mines]
 	 * @param str String to read.
 	 * @return a new Field from the String.
+	 * TODO Rewrite or delete
 	 */
 	public static Field parse(String str)
 	throws NullPointerException, NumberFormatException, ArrayIndexOutOfBoundsException
