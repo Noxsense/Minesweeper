@@ -6,6 +6,7 @@ PACKAGE = nox/minesweeper
 MAIN    = nox.minesweeper.desktop.Minesweeper
 SRC     = src
 LOGIC   = $(SRC)/$(PACKAGE)/logic
+TESTS   = $(SRC)/$(PACKAGE)/tests
 DESKTOP = $(SRC)/$(PACKAGE)/desktop
 ANDROID = $(SRC)/$(PACKAGE)/android
 LABELS  = $(DESKTOP)/labels.csv
@@ -36,6 +37,10 @@ run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)
 	@cd $(CLASSES) && java -jar $(PROJECT).jar
 
 
+test: tests
+	@cd $(CLASSES) && java nox.minesweeper.tests.MinesweeperTest
+
+
 # 
 #
 # Build
@@ -48,6 +53,11 @@ $(APK): $(CLASSES)/$(PACKAGE)/logic/*.class $(ANDROID) res/*/*
 desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
 $(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(DESKTOP)
 	@$(JAVAC) $(DESKTOP)/*.java && echo "Desktop GUI is built"
+
+
+tests: $(CLASSES)/$(PACKAGE)/tests/*.class
+$(CLASSES)/$(PACKAGE)/tests/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(TESTS)
+	@$(JAVAC) $(TESTS)/*.java && echo "Tests are built"
 
 
 logic: $(CLASSES)/$(PACKAGE)/logic/*.class
