@@ -43,7 +43,19 @@ public class Game
 	 */
 	public Game(int height, int width, int mines) throws ArrayIndexOutOfBoundsException
 	{
-		this.field = new Field(height, width);
+		this(new Field(height,width), mines);
+	}
+
+
+	/**
+	 * Initate a new Game with the given attributes.
+	 * @param field
+	 * @param mines 
+	 * @throws ArrayIndexOutOfBoundsException 
+	 */
+	public Game(Field field, int mines) throws NullPointerException, ArrayIndexOutOfBoundsException
+	{
+		this.field = field;
 
 		if (field.size() <= mines)
 			throw new ArrayIndexOutOfBoundsException("Too many mines");
@@ -369,7 +381,7 @@ public class Game
 	 */
 	public boolean equals(Game g)
 	{
-		return g!=null && this.equals(
+		return g!=null && this.hasAttributes(
 				g.field.getHeight(),
 				g.field.getWidth(),
 				g.mines);
@@ -383,7 +395,7 @@ public class Game
 	 * @param mines 
 	 * @return 
 	 */
-	public boolean equals(int height, int width, int mines)
+	public boolean hasAttributes(int height, int width, int mines)
 	{
 		return this.field.getHeight()==height
 			&& this.field.getWidth()==width

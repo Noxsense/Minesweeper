@@ -15,6 +15,7 @@ CLASSES = bin/classes
 APK     = bin/Minesweeper-debug.apk
 
 # tools.
+JAVA  = java
 JAVAC = javac $(JTAGS) $(BTAGS)
 JTAGS = -Xdiags:verbose -Xlint:deprecation -Xlint:unchecked #-Xlint:all
 BTAGS = -d $(CLASSES) -cp $$CLASSPATH:$(CLASSES) # build tags
@@ -26,7 +27,7 @@ MKDIR = mkdir -p
 # Run
 #
 run: desktop
-	@cd $(CLASSES) && java $(MAIN)
+	@cd $(CLASSES) && $(JAVA) $(MAIN)
 
 
 android-install: $(APK)
@@ -34,11 +35,11 @@ android-install: $(APK)
 
 
 run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)
-	@cd $(CLASSES) && java -jar $(PROJECT).jar
+	@cd $(CLASSES) && $(JAVA) -jar $(PROJECT).jar
 
 
 test: tests
-	@cd $(CLASSES) && java nox.minesweeper.tests.MinesweeperTest
+	@cd $(CLASSES) && $(JAVA) nox.minesweeper.tests.MinesweeperTest
 
 
 # 
@@ -52,17 +53,17 @@ $(APK): $(CLASSES)/$(PACKAGE)/logic/*.class $(ANDROID) res/*/*
 
 desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
 $(CLASSES)/$(PACKAGE)/desktop/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(DESKTOP)
-	@$(JAVAC) $(DESKTOP)/*.java && echo "Desktop GUI is built"
+	@$(JAVAC) $(DESKTOP)/*.$(JAVA) && echo "Desktop GUI is built"
 
 
 tests: $(CLASSES)/$(PACKAGE)/tests/*.class
 $(CLASSES)/$(PACKAGE)/tests/*.class: $(CLASSES)/$(PACKAGE)/logic/*.class $(TESTS)
-	@$(JAVAC) $(TESTS)/*.java && echo "Tests are built"
+	@$(JAVAC) $(TESTS)/*.$(JAVA) && echo "Tests are built"
 
 
 logic: $(CLASSES)/$(PACKAGE)/logic/*.class
 $(CLASSES)/$(PACKAGE)/logic/*.class: $(CLASSES) $(LOGIC)
-	@$(JAVAC) $(LOGIC)/*.java && echo "Logic is built"
+	@$(JAVAC) $(LOGIC)/*.$(JAVA) && echo "Logic is built"
 
 
 $(BIN)/$(PROJECT).jar: build

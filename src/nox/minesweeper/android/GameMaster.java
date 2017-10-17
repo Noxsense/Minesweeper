@@ -203,7 +203,7 @@ public class GameMaster
 	{
 		for (Game g : this.games)
 		{
-			if (!g.equals(height,width,mines))
+			if (!g.hasAttributes(height,width,mines))
 				continue;
 			return true;
 		}
