@@ -23,15 +23,9 @@ import nox.minesweeper.logic.*;
  *	+isPaused()
  *	+isRunning()
  *	+loadStatisticFrom(Statistic statistic)
- *	+now()
- *	+open(int index)
- *	+pause()
  *	+resetStatistics()
- *	+restart()
- *	+resume()
  *	+resumeWith(long playedTime)
  *	+reveal()
- *	+toString()
  *	+toggleMark(int index)
 */
 public class GameStatsTests
@@ -150,7 +144,7 @@ public class GameStatsTests
 	public void testStatistics()
 	{
 		Statistic stats;
-		long time, sum, timeMin, statsAVG, statsBEST;
+		long time, sum, timeMin, statsAVG, statsBEST, offset;
 		int won;
 
 		msg = "Own stats are matching.";
@@ -166,9 +160,10 @@ public class GameStatsTests
 
 		msg = "Test calculation of Won Games";
 		sum = 0;
+		offset = 2;
 		timeMin = Long.MAX_VALUE;
 
-		for (won=1; won<9; won++)
+		for (won=1; won<900; won++)
 		{
 			time = Math.round(Math.random()*100);
 			sum += time;
@@ -180,7 +175,10 @@ public class GameStatsTests
 
 			assertEquals(msg+" Lost Games", 1, stats.countGamesWon(false));
 			assertEquals(msg+" New Won game", won, stats.countGamesWon(true));
-			assertEquals(msg+" Average time with "+won, sum/won, statsAVG);
+			MinesweeperTest.assertInRange(
+					msg+" Average time with "+won,
+					sum/won-offset, sum/won+offset,
+					statsAVG);
 			assertEquals(msg+" Best time", timeMin, statsBEST);
 		}
 	}

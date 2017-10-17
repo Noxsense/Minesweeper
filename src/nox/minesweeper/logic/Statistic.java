@@ -56,6 +56,10 @@ public class Statistic
 	{
 		original = (original==null) ? new Statistic(0,0,0) : original;
 
+		this.gameHeight = original.gameHeight;
+		this.gameWidth  = original.gameWidth;
+		this.gameMines  = original.gameMines;
+
 		this.gamesWon    = original.gamesWon;
 		this.gamesLost   = original.gamesLost;
 		this.timeAverage = original.timeAverage;
@@ -212,6 +216,21 @@ public class Statistic
 			&& that.gameHeight == this.gameHeight
 			&& that.gameWidth  == this.gameWidth
 			&& that.gameMines  == this.gameMines
+			;
+	}
+
+
+	/**
+	 * Check if this statistic matches the given game.
+	 * @param game game.
+	 * @return true, if the dimenesions are the same.
+	 */
+	public boolean match(Game game)
+	{
+		return game!=null
+			&& game.field.getHeight() == this.gameHeight
+			&& game.field.getWidth()  == this.gameWidth
+			&& game.mines  == this.gameMines
 			;
 	}
 
