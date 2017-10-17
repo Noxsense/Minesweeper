@@ -102,4 +102,44 @@ public class GameStatsTests
 		msg = msg+":Played Time (at least "+seconds+")";
 		assertEquals(msg, true, seconds<=this.game.getTime(Game.PLAYED_TIME));
 	}
+
+
+	@Test
+	public void testStatistics()
+	{
+		Statistic stats;
+		long time, sum, timeMin, statsAVG, statsBEST;
+		int won;
+
+		msg = "Own stats are matching.";
+		assertEquals(msg, true, this.game.getStatistics().match(this.game));
+
+		msg = "Matching stats are matching.";
+		assertEquals(msg, true, (stats=new Statistic(this.game)).match(this.game));
+		assertEquals(msg, true, (stats=new Statistic(height, width, mines)).match(this.game));
+
+		msg = "Lost Game";
+		stats.addWon(false, 0); // lost game
+		assertEquals(msg, 1, stats.countGamesWon(false));
+
+		msg = "Test calculation of Won Games";
+		sum = 0;
+		timeMin = Long.MAX_VALUE;
+
+		for (won=1; won<9; won++)
+		{
+			time = Math.round(Math.random()*100);
+			sum += time;
+			timeMin = (time<timeMin) ? time : timeMin;
+			stats.addWon(true, time); // won game
+
+			statsAVG = stats.getTime(Statistic.AVERAGE_TIME);
+			statsBEST = stats.getTime(Statistic.BEST_TIME);
+
+			assertEquals(msg+" Lost Games", 1, stats.countGamesWon(false));
+			assertEquals(msg+" New Won game", won, stats.countGamesWon(true));
+			assertEquals(msg+" Average time with "+won, sum/won, statsAVG);
+			assertEquals(msg+" Best time", timeMin, statsBEST);
+		}
+	}
 }
