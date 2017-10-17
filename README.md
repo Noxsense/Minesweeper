@@ -9,31 +9,6 @@ Small Minesweeper Project with GUI and a Solver (wip).
 ![Screenshot: Statisitcs](screenshots/Statistics.png)
 
 
-## Directories:
-```
-.
-├── res/
-│   └── labels.csv
-├── screenshots/
-├──src/
-   └── nox
-       └── minesweeper/
-           ├── desktop/
-           │   ├── GameField.java
-           │   ├── LabelsFiller.java
-           │   ├── Labels.java
-           │   └── Minesweeper.java
-           └── logic/
-               ├── Field.java
-               ├── ParsedField.java
-               ├── PlayGround.java
-               └── Solver.java
-```
-
-
-Where res/labels.csv contains the labels for the gui.
-
-
 ## Compiling Desktop GUI
 This will create class files in /tmp/Minesweeper
 In main directory run for building:
@@ -44,4 +19,32 @@ make build
 and for running:
 ```
 make run
+```
+
+
+## Directories:
+```
+.
+├── Makefile
+├── AndroidManifest.xml
+├── ant.properties
+├── build.xml
+├── project.properties
+├── res
+├── screenshots
+├── src
+│   └── nox
+│       └── minesweeper
+│           ├── android
+│           │   └── ... GUI for Android
+│           ├── desktop
+|           |   ├── ... Main: Minesweeper
+│           │   └── ... GUI and Visible interpretations for the logic 
+│           ├── logic
+|           |   ├── ... Main: PlayGround
+│           │   └── ... *.java field, pausable game, statistics...
+│           └── tests
+|           |   ├── ... Main: MinesweeperTest
+│           │   └── ... *.java (using unittest)
+└── todo.txt
 ```
