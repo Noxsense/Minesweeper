@@ -792,9 +792,6 @@ public class Field
 	 */
 	public int[] getWithState(State s, int min)
 	{
-		if (this.isLost())
-			return new int[0];
-
 		int     len;
 		int[]   tmp, requested;
 		boolean useMin = s == State.OPEN && 0<min; // else useless
