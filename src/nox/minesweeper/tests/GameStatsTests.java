@@ -144,7 +144,8 @@ public class GameStatsTests
 	public void testStatistics()
 	{
 		Statistic stats;
-		long time, sum, timeMin, statsAVG, statsBEST, offset;
+		long time, sum, timeMin, statsAVG, statsBEST;
+		double offset;
 		int won;
 
 		msg = "Own stats are matching.";
@@ -160,12 +161,12 @@ public class GameStatsTests
 
 		msg = "Test calculation of Won Games";
 		sum = 0;
-		offset = 2;
+		offset = .05;
 		timeMin = Long.MAX_VALUE;
 
-		for (won=1; won<900; won++)
+		for (won=1; won<=1000; won++)
 		{
-			time = Math.round(Math.random()*100);
+			time = Math.round(Math.random()*1000*3600*10); // until 10 min
 			sum += time;
 			timeMin = (time<timeMin) ? time : timeMin;
 			stats.addWon(true, time); // won game
@@ -177,7 +178,8 @@ public class GameStatsTests
 			assertEquals(msg+" New Won game", won, stats.countGamesWon(true));
 			MinesweeperTest.assertInRange(
 					msg+" Average time with "+won,
-					sum/won-offset, sum/won+offset,
+					Math.round(sum/won*(1-offset)),
+					Math.round(sum/won*(1+offset)),
 					statsAVG);
 			assertEquals(msg+" Best time", timeMin, statsBEST);
 		}
