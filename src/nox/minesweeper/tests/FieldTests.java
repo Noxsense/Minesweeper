@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.ArrayList;
 
@@ -17,41 +17,6 @@ import nox.minesweeper.logic.*;
 /**
  * Class FieldTest.
  * Run unit test to proove the field methods.
- *
- *	+fillMines(int[] mineIndices)
- *	+fillRandomly(int minesCnt)
- *	+fillRandomly(int minesCnt, int except)
- *	+getDisplay(int info)
- *	+getHeight()
- *	+getMarked()
- *	+getMineIndices()
- *	+getMines()
- *	+getNeighbours(int index)
- *	+getNeighbours(int row, int col)
- *	+getState(int index)
- *	+getState(int row, int col)
- *	+getWidth()
- *	+getWithState(State s, int min)
- *	+isLost()
- *	+isWon()
- *	+onPosition(int index)
- *	+onPosition(int row, int col)
- *	+oneLine()
- *	+open(int index)
- *	+open(int row, int col)
- *	+parse(String str)
- *	+print()
- *	+reveal()
- *	+setDisplay0(char d)
- *	+setDisplayClosed(char d)
- *	+setDisplayMarked(char d)
- *	+setDisplayMine(char d)
- *	+showAll()
- *	+size()
- *	+toggleMark(int index)
- *	+toggleMark(int row, int col)
- *	-clear()
- *	
 */
 public class FieldTests
 {
@@ -145,13 +110,13 @@ public class FieldTests
 	public void testNeighbours()
 	{
 		msg = "Get neighbours of top left position.";
-		assertEquals(msg, true, field.getNeighbours(0,0).length <= 3);
+		MinesweeperTest.assertMax(msg, 3, field.getNeighbours(0,0).length);
 
 		msg = "Get neighbours of bottom right position";
-		assertEquals(msg, true, field.getNeighbours(height-1,width-1).length <= 3);
+		MinesweeperTest.assertMax(msg, 3, field.getNeighbours(height-1,width-1).length );
 
 		msg = "Get neighbours of another edge position";
-		assertEquals(msg, true, field.getNeighbours(0,1).length <= 5);
+		MinesweeperTest.assertMax(msg, 5, field.getNeighbours(0,1).length );
 
 		msg = "Get neighbours of a non-edge position";
 		if (height>2 && width > 2)
@@ -183,48 +148,79 @@ public class FieldTests
 		field.open(savePos);
 		assertEquals(msg, true, field.isLost());
 
-		savePos = 0;
-		for (;savePos<field.size(); savePos++)
+		int[] pos = new int[]
 		{
-			msg = "Test pos: "+savePos;
+			// corners
+			0, this.field.size()-1, width,
 
-			msg  = "Test pos \""+savePos+"\"";
+			// edges
+			1, width -1,
+
+			// mid positions
+			(width+1)%field.size()
+		};
+
+		for (int p : pos)
+		{
+			msg = "Test pos: "+p;
+
+			msg  = "Test pos \""+p+"\"";
 			msg += ": CLOSED value";
 			this.resetField();
-			assertEquals(msg, Field.VALUE_CLOSED, field.onPosition(savePos));
+			assertEquals(msg, Field.VALUE_CLOSED, field.onPosition(p));
 
-			msg  = "Test pos \""+savePos+"\"";
+			msg  = "Test pos \""+p+"\"";
 			msg += ": MINE value";
-			field.fillMines(new int[]{savePos});
-			field.open(savePos);
-			assertEquals(msg, Field.VALUE_MINE_ON_POS, field.onPosition(savePos));
+			field.fillMines(new int[]{p});
+			field.open(p);
+			assertEquals(msg, Field.VALUE_MINE_ON_POS, field.onPosition(p));
 
-			msg  = "Test pos \""+savePos+"\"";
+			msg  = "Test pos \""+p+"\"";
 			msg += ": MARKED value";
 			this.resetField();
-			field.toggleMark(savePos);
-			assertEquals(msg, Field.VALUE_MARKED, field.onPosition(savePos));
+			field.toggleMark(p);
+			assertEquals(msg, Field.VALUE_MARKED, field.onPosition(p));
 
-			msg  = "Test pos \""+savePos+"\"";
+			msg  = "Test pos \""+p+"\"";
 			msg += ": No mines in neighbourhood (value)";
 			this.resetField();
-			field.open(savePos);
-			assertEquals(msg, 0, field.onPosition(savePos));
+			field.open(p);
+			assertEquals(msg, 0, field.onPosition(p));
 
-			msg  = "Test pos \""+savePos+"\"";
+			msg  = "Test pos \""+p+"\"";
 			msg += ": All neighbours are mines";
-			indices = field.getNeighbours(savePos);
+			indices = field.getNeighbours(p);
 			field.fillMines(indices);
-			field.open(savePos);
-			assertEquals(msg, indices.length, field.onPosition(savePos));
+			field.open(p);
+			assertEquals(msg, indices.length, field.onPosition(p));
 
-			msg  = "Test pos \""+savePos+"\"";
+			msg  = "Test pos \""+p+"\"";
 			msg += ": Some neighbours";
-			field.fillRandomly(mines, savePos);
-			field.open(savePos);
-			value = field.onPosition(savePos);
-			assertEquals(msg+" might be mines", true, 0<=value);
-			assertEquals(msg+", but not more", true, value<=indices.length);
+			field.fillRandomly(mines, p);
+			field.open(p);
+			value = field.onPosition(p);
+			MinesweeperTest.assertMin(msg+" might be mines", 0, value);
+			MinesweeperTest.assertMax(msg+", but not more",  indices.length, value);
+		}
+
+		int opened = 0;
+		field.fillRandomly(mines);
+
+		opened = field.getWithState(Field.State.OPEN, 0).length;
+		field.reveal();
+
+		msg = "Game:reveal() => Lost => Not won";
+		assertEquals(msg, true, this.field.isLost());
+		assertEquals(msg, false, this.field.isWon());
+
+		msg = "All and only mines are opend now.";
+		opened = opened + mines;
+		assertEquals(msg+":OPENED", opened, this.field.getWithState(Field.State.OPEN,0).length);
+		assertEquals(msg+":CLOSED", field.size()-opened, this.field.getWithState(Field.State.CLOSED, 0).length);
+
+		for (int index : this.field.getWithState(Field.State.OPEN,0))
+		{
+			assertNotEquals("Correct State.", Field.State.CLOSED, field.getState(index));
 		}
 	}
 
@@ -232,22 +228,48 @@ public class FieldTests
 	@Test
 	public void testToggleMarks()
 	{
+		int[] positions = new int[]
+		{
+			// corners
+			0, this.field.size()-1, width,
+
+			// edges
+			1, width -1,
+
+			// mid positions
+			(width+1)%field.size()
+		};
+		int count = 0;
+
 		msg = "Add a new Marked Positions";
-		for (int i=0; i<this.field.size(); i++)
+		for (int i : positions)
 		{
 			this.field.toggleMark(i); // toggle index i
-			assertEquals(msg, i+1, this.field.getMarked());
+			count += 1;
+			assertEquals(msg, count, this.field.getMarked());
 			assertEquals(msg, Field.State.MARKED, this.field.getState(i));
 		}
 
 		msg = "Nothing can be opened";
-		for (int i=0; i<this.field.size(); i++)
+		for (int i : positions)
 		{
 			this.field.open(i);
 			assertEquals(msg, 0, this.field.getWithState(Field.State.OPEN,0).length);
+			assertEquals(msg, Field.State.MARKED, this.field.getState(i));
 		}
 
+		msg = "Field is neither won nor lost";
+		assertEquals(msg+":WON", false, field.isWon());
+		assertEquals(msg+":Lost", false, field.isLost());
 
+		msg = "Unmark all";
+		for (int i : positions)
+		{
+			this.field.toggleMark(i);
+			count += -1;
+			assertEquals(msg, count, this.field.getWithState(Field.State.MARKED,0).length);
+			assertEquals(msg, Field.State.CLOSED, this.field.getState(i));
+		}
 	}
 
 
@@ -294,4 +316,3 @@ public class FieldTests
 
 	}
 }
-
