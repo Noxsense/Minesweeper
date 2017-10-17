@@ -78,7 +78,7 @@ public class GameStatsTests
 	public void testGameFlow()
 	{
 		int  index = 0;
-		long seconds = 0;
+		long seconds = 0, playedTime = 0, startTime;
 
 		msg = "Nothing done yet.";
 		assertEquals(msg, false, this.game.isRunning());
@@ -100,7 +100,49 @@ public class GameStatsTests
 			seconds = 0;
 		}
 		msg = msg+":Played Time (at least "+seconds+")";
-		assertEquals(msg, true, seconds<=this.game.getTime(Game.PLAYED_TIME));
+		MinesweeperTest.assertMin(msg, seconds, this.game.getTime(Game.PLAYED_TIME));
+
+		msg = "Pause game";
+		startTime  = this.game.getTime(Game.START_TIME);
+		playedTime = this.game.getTime(Game.PLAYED_TIME);
+		this.game.pause();
+		assertEquals(msg, true, this.game.isPaused());
+		assertEquals(msg, playedTime/10, this.game.getTime(Game.PLAYED_TIME)/10); // round
+
+		// try to wait.
+		seconds = 100;
+		try
+		{
+			sleep(seconds);
+		}
+		catch (InterruptedException e)
+		{
+			seconds = 0;
+		}
+
+		msg = "Wait. Game's still paused";
+		assertEquals(msg, true, this.game.isPaused());
+		assertEquals(msg, playedTime/10, this.game.getTime(Game.PLAYED_TIME)/10); // round
+
+		// try to wait.
+		seconds = 1000;
+		try
+		{
+			sleep(seconds);
+		}
+		catch (InterruptedException e)
+		{
+			seconds = 0;
+		}
+
+		msg = "Resume Game";
+		this.game.resume();
+		assertEquals(msg, false, this.game.isPaused());
+		assertEquals(msg, playedTime/10, this.game.getTime(Game.PLAYED_TIME)/10); // round
+		assertEquals(msg, true, this.game.isRunning() || this.game.field.isWon());
+
+		msg = "New calculated start time (depends on played time)";
+		assertNotEquals(msg, startTime/10, this.game.getTime(Game.START_TIME)/10); // round
 	}
 
 
