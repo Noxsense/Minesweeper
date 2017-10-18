@@ -321,7 +321,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			this.giveUpBtn.setForeground(fg);
 
 			JPanel topPanel = new JPanel();
-			topPanel.setBackground(bg);
+			topPanel.setBackground(null);
 			topPanel.setLayout(new GridLayout(1,3));
 			topPanel.add(this.gameLabel);
 			topPanel.add(this.giveUpBtn);
@@ -330,6 +330,7 @@ public class Minesweeper extends JFrame implements ActionListener
 			this.gameField = new GameField(this);
 
 			this.gameView = new JPanel(new BorderLayout());
+			this.gameView.setBackground(null);
 			this.gameView.setOpaque(false); // transparent.
 			this.gameView.add(topPanel, BorderLayout.NORTH);
 			this.gameView.add(this.gameField, BorderLayout.CENTER);
@@ -475,6 +476,25 @@ public class Minesweeper extends JFrame implements ActionListener
 		
 		this.gameLabel.setText(state);
 		this.showGameTime();
+		this.setGiveUpButton();
+	}
+
+
+	/**
+	 * Set the give up button.
+	 */
+	protected void setGiveUpButton()
+	{
+		Game game = this.gameField.getGame();
+		if (game!=null && game.field.isWon())
+		{
+			this.getGiveUpButton().setText(":)");
+			this.getGiveUpButton().setToolTipText("Start a new Game");
+			return;
+		}
+
+		this.getGiveUpButton().setText(":(");
+		this.getGiveUpButton().setToolTipText("This will end this game automatically.");
 	}
 
 
@@ -497,7 +517,7 @@ public class Minesweeper extends JFrame implements ActionListener
 
 
 		String f = "%.2f s";
-		double played = game.getTime(Game.PLAYED_TIME) * 1E-9;
+		double played = game.getTime(Game.PLAYED_TIME) * 1E-3;
 		this.timeLabel.setText(String.format(f, played));
 	}
 

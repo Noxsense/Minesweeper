@@ -86,7 +86,6 @@ class GameField extends Canvas implements MouseListener
 	public void openGame(Game g)
 	{
 		this.game = g;
-		this.setGiveUpButton();
 	}
 
 
@@ -333,8 +332,6 @@ class GameField extends Canvas implements MouseListener
 		this.game.open(this.aimedFieldPos);
 
 
-		this.setGiveUpButton();
-
 		this.resetMouseClick();
 		this.repaint();
 	}
@@ -348,22 +345,6 @@ class GameField extends Canvas implements MouseListener
 		this.host.updateGameLabel();
 		this.mouseClickStarted = Long.MAX_VALUE;
 		this.aimedFieldPos     = -1;
-	}
-
-
-	/**
-	 * Set the give up button.
-	 */
-	private void setGiveUpButton()
-	{
-		if (this.game!=null && this.game.field.isWon())
-		{
-			this.host.getGiveUpButton().setText(":)");
-			this.host.getGiveUpButton().setToolTipText("Start a new Game");
-		}
-
-		this.host.getGiveUpButton().setText(":(");
-		this.host.getGiveUpButton().setToolTipText("This will end this game automatically.");
 	}
 
 
