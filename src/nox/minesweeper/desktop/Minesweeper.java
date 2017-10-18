@@ -366,6 +366,18 @@ public class Minesweeper extends JFrame implements ActionListener
 		this.gameTimer.start();
 
 		this.updateGameLabel();
+
+		Dimension size;
+		size = this.gameField.getPaintedFieldSize();
+
+		size.setSize(size.getWidth(),
+				size.getHeight()
+				+this.giveUpBtn.getHeight()
+				);
+
+		this.getContentPane().setPreferredSize(size);
+		this.pack();
+		this.getContentPane().setPreferredSize(null);
 	}
 
 
@@ -408,6 +420,16 @@ public class Minesweeper extends JFrame implements ActionListener
 		this.currView = this.selectorView.getName();
 		this.getJMenuBar().setVisible(true);
 		this.prefsMenu.setVisible(true);
+
+		if (this.fieldsModel.getSize()<1)
+			return;
+
+		Dimension size;
+		size = this.mSlider.getSize();
+		size.setSize(size.getWidth()*2.1, size.getHeight()*6.3);
+		this.getContentPane().setPreferredSize(size);
+		this.pack();
+		this.getContentPane().setPreferredSize(null);
 	}
 
 
@@ -754,18 +776,27 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		menuBar = new JMenuBar();
 		menuBar.setOpaque(false);
+		menuBar.setBackground(null);
 
 		/*Return to home view in other views.*/
 		menuItem = this.createJMenuItem(ls.get("BTN_BACK"), this, "GO_HOME");
+		menuItem.setOpaque(false);
+		menuItem.setBackground(null);
 		menuBar.add(menuItem);
 
 		this.prefsMenu = new JMenu(ls.get("MENU_PREFERENCES"));
+		this.prefsMenu.setOpaque(false);
+		this.prefsMenu.setBackground(null);
 		this.prefsMenu.setMnemonic(KeyEvent.VK_P);
 
 		menuItem = this.createJMenuItem(ls.get("MENU_EXPORT"), this, "FIELDS_EXPORT");
+		menuItem.setOpaque(false);
+		menuItem.setBackground(null);
 		this.prefsMenu.add(menuItem);
 
 		menuItem = this.createJMenuItem(ls.get("MENU_IMPORT"), this, "FIELDS_IMPORT");
+		menuItem.setOpaque(false);
+		menuItem.setBackground(null);
 		this.prefsMenu.add(menuItem);
 
 		menuBar.add(this.prefsMenu);

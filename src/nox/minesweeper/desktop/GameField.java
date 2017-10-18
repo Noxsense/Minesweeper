@@ -39,6 +39,8 @@ class GameField extends Canvas implements MouseListener
 	private Graphics buffGraphics;
 	private Image    buffImage;
 
+	private Dimension paintedFieldSize;
+
 
 	/**
 	 * Class Design.
@@ -280,6 +282,39 @@ class GameField extends Canvas implements MouseListener
 
 
 	/**
+	 * Get the dimension of currently painted Field.
+	 * If there is currently no game and no field,
+	 * it will be at least one cell big.
+	 * @return preferred Dimension.
+	 */
+	public Dimension getPaintedFieldSize()
+	{
+		/*Initate paintedFieldSize*/
+		if (this.paintedFieldSize == null)
+		{
+			this.paintedFieldSize = new Dimension(1,1);
+		}
+
+		/*Set preferred size in dependencies of the current game.*/
+		if (this.game==null)
+		{
+			this.paintedFieldSize.setSize(this.getCellSize(),this.getCellSize());
+		}
+		else
+		{
+			double size = this.getCellSize();
+			double gap  = this.getCellGap();
+			double line = .1; // pixel width (border left AND right together)
+			this.paintedFieldSize.setSize(
+					(this.game.field.getWidth() -1)*(size+gap+line)+ size,
+					(this.game.field.getHeight()-1)*(size+gap+line)+ size);
+		}
+		return this.paintedFieldSize;
+	}
+
+
+
+	/**
 	 * Set new size of one cell (square).
 	 * @param size new size value, at least 1.
 	 */
@@ -374,7 +409,9 @@ class GameField extends Canvas implements MouseListener
 	 */
 	private Graphics getBufferedGraphics()
 	{
-		if (this.buffGraphics == null)
+		if (this.buffGraphics==null
+				|| this.buffImage.getWidth(this)  < this.getWidth()
+				|| this.buffImage.getHeight(this) < this.getHeight())
 		{
 			try
 			{
