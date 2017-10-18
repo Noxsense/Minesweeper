@@ -557,7 +557,7 @@ public class Minesweeper extends JFrame implements ActionListener
 
 		Game game = this.getRecentGame();
 
-		if (game == null || !game.isRunning())
+		if (game == null)
 		{
 			return;
 		}
@@ -581,6 +581,8 @@ public class Minesweeper extends JFrame implements ActionListener
 		}
 
 		game.restart();
+		this.updateGameLabel();
+		this.showGameTime();
 		this.gameField.repaint();
 	}
 

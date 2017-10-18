@@ -478,8 +478,11 @@ class GameField extends Canvas implements MouseListener
 		}
 
 		int offset = this.getCellSize()+this.getCellGap();
+		int width  = this.game.field.getWidth();
 
-		return p.y/(offset)*this.game.field.getWidth() + p.x/(offset);
+		return ((offset*width) < p.x)
+			? this.point2Index(null)
+			: (p.y/(offset)*width) + p.x/(offset);
 	}
 
 
