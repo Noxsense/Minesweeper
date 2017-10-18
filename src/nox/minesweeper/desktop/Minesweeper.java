@@ -101,6 +101,7 @@ public class Minesweeper extends JFrame implements ActionListener
 		this.fieldsModel = new DefaultListModel<Game>();
 
 		this.setLayout(this.layout = new CardLayout()); // card layout.
+		this.setBackground(Color.WHITE);
 
 		this.initiateMenu(); // home button and other buttons.
 		this.showHome();
