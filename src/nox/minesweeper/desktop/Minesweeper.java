@@ -178,12 +178,15 @@ public class Minesweeper extends JFrame implements ActionListener
 				break;
 
 			default:
-				Game game = this.gameField.getGame();
-				if (game==null)
+				Game recent = this.getRecentGame();
+				if (recent==null)
 					return;
-				game.pause(); // pause game if running.
+				recent.pause(); // pause game if running.
 				break;
 		}
+
+		this.revalidate();
+		this.repaint();
 	}
 
 
@@ -288,7 +291,7 @@ public class Minesweeper extends JFrame implements ActionListener
 					String name = e.getComponent().getName();
 					if (name != null && name.equals(Minesweeper.this.gameView.getName()))
 					{
-						Game curr = Minesweeper.this.gameField.getGame();
+						Game curr = Minesweeper.this.getRecentGame();
 						if (curr != null)
 						{
 							curr.pause();
@@ -343,6 +346,25 @@ public class Minesweeper extends JFrame implements ActionListener
 		this.currView = this.gameView.getName();
 		this.getJMenuBar().setVisible(true);
 		this.prefsMenu.setVisible(false);
+
+		Game game = this.getRecentGame();
+
+		if (game == null) // do nothing... don't show.
+		{
+			this.showHome();
+			return;
+		}
+
+		this.gameField.openGame(game);
+
+		/*Don't wait for the second "first move"; resume if opened.*/
+		if (game.isPaused())
+		{
+			game.resume();
+		}
+		this.gameTimer.start();
+
+		this.updateGameLabel();
 	}
 
 
@@ -464,15 +486,16 @@ public class Minesweeper extends JFrame implements ActionListener
 			this.gameView.add(this.gameLabel, BorderLayout.NORTH);
 		}
 
-		Game  game;
-		if ((game=this.gameField.getGame()) == null)
+		Game game = this.getRecentGame();
+		if (game == null)
 		{
 			this.gameLabel.setText("");
 			return;
 		}
 
 		String state;
-		state = game.field.getMarked()+"/"+game.field.getMines();
+		state = game.field.getMarked()
+			+ "/"+game.field.getMines();
 		
 		this.gameLabel.setText(state);
 		this.showGameTime();
@@ -485,7 +508,8 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	protected void setGiveUpButton()
 	{
-		Game game = this.gameField.getGame();
+		Game game = this.getRecentGame();
+
 		if (game!=null && game.field.isWon())
 		{
 			this.getGiveUpButton().setText(":)");
@@ -508,13 +532,12 @@ public class Minesweeper extends JFrame implements ActionListener
 			return;
 		}
 
-		Game game = this.gameField.getGame();
+		Game game = this.getRecentGame();
 
 		if (game == null || !game.isRunning())
 		{
 			return;
 		}
-
 
 		String f = "%.2f s";
 		double played = game.getTime(Game.PLAYED_TIME) * 1E-3;
@@ -527,7 +550,7 @@ public class Minesweeper extends JFrame implements ActionListener
 	 */
 	private void restartCurrent()
 	{
-		Game game = this.gameField.getGame();
+		Game game = this.getRecentGame();
 
 		if (game == null)
 		{
@@ -551,8 +574,6 @@ public class Minesweeper extends JFrame implements ActionListener
 			return;
 		}
 
-		this.showGame();
-
 		DefaultListModel<Game> fieldsM;
 		fieldsM = (DefaultListModel<Game>) this.fieldsModel;
 
@@ -569,18 +590,21 @@ public class Minesweeper extends JFrame implements ActionListener
 				.add(this.createSelector());
 		}
 
-		this.gameField.openGame(game);
+		this.showGame();
+	}
 
-		this.gameTimer.start();
 
-		if (this.gameField.getGame().isRunning()) // don't wait for click to resume.
+	/**
+	 * Get the most recent Game.
+	 * @return get the most recent game as Game, if there are no games at all null.
+	 */
+	private Game getRecentGame()
+	{
+		if (this.fieldsModel == null || this.fieldsModel.getSize()<1)
 		{
-			this.gameField.getGame().resume();
+			return null;
 		}
-
-		this.updateGameLabel();
-		this.revalidate();
-		this.repaint();
+		return this.fieldsModel.getElementAt(0);
 	}
 
 
