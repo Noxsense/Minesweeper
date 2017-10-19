@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
 
@@ -21,7 +22,7 @@ import nox.minesweeper.logic.*;
  * Class GameField.
  * Graphical representation for games.
  */
-class GameField extends Canvas implements MouseListener
+class GameField extends Canvas implements MouseListener, MouseMotionListener
 {
 	private final static long MARK_TIME_MIN = 10;
 
@@ -232,6 +233,7 @@ class GameField extends Canvas implements MouseListener
 
 		this.setBackground(null);
 		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
 
 		Field.setDisplay0(' ');
 		this.setCellSize(30);
@@ -487,16 +489,24 @@ class GameField extends Canvas implements MouseListener
 
 
 	@Override
+	public void mouseMoved(MouseEvent e)
+	{
+		// on hover
+	}
+
+
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
+		// on hover
 	}
 
 
 	@Override
 	public void mouseExited(MouseEvent e)
 	{
+		// on hover
 	}
-
 
 
 	@Override
@@ -507,6 +517,15 @@ class GameField extends Canvas implements MouseListener
 		if (e==null) return;
 
 		this.aimedFieldPos = this.point2Index(e.getPoint());
+	}
+
+
+	@Override
+	public void mouseDragged(MouseEvent e)
+	{
+		Rectangle r = new Rectangle(e.getX(), e.getY(), 1,1);
+		System.out.println("Mouse Dragged");
+		//scrollRectToVisible(r);
 	}
 
 
