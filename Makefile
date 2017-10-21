@@ -73,7 +73,6 @@ $(BIN)/$(PROJECT).jar: build
 #
 # Extras
 #
-$(BIN): $(CLASSES)
 
 $(CLASSES):
 	@$(MKDIR) $(CLASSES)
@@ -86,5 +85,5 @@ $(CLASSES)/$(LABELS): $(CLASSES) $(LABELS)
 #
 # Clean
 #
-clean: $(BIN)
+clean:
 	@ant clean

@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,7 +64,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		/**
 		 * Create a new Gameview.
 		 * Initate the colours and anything.
-		 * @param context 
+		 * @param context
 		 */
 		public GameView(Context context)
 		{
@@ -88,6 +91,27 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 				this.paintOpened[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
 				this.paintOpened[i].setARGB((31*i)%255, 255, 255, 255);
 			}
+		}
+
+
+		@Override
+		public void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+		{
+			Game game = PlayActivity.this.game;
+			if (game==null)
+			{
+				super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+				return;
+			}
+
+			double width, height, gap;
+			gap    = this.getCellGap();
+			width  = game.field.getWidth()*(this.cellSize+gap) - gap;
+			height = game.field.getHeight()*(this.cellSize+gap)- gap;
+
+			this.setMeasuredDimension(
+					(int)Math.round(width),
+					(int)Math.round(height));
 		}
 
 
@@ -205,7 +229,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 					this.aimedPos.set(pointer, cell);
 
-					return true;
+					return false; // maybe scrolling => not consumed yet
 
 
 					/* Check if the pointer is still referring the aimed position.
@@ -248,13 +272,13 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 					this.invalidate();
 					PlayActivity.this.showInfo();
 
-					return true;
+					return false; // maybe scrolling => not consumed yet
 
 				default:
 					break;
 			}
 
-			return true;
+			return false; // maybe scrolling => not consumed yet
 		}
 
 
@@ -272,7 +296,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Get the gap between cells.
-		 * @return 
+		 * @return the gap between cells
 		 */
 		private float getCellGap()
 		{
@@ -282,7 +306,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Translate the given field coordinates to a canvas position.
-		 * @param coords cooridinates to translate. 
+		 * @param coords cooridinates to translate.
 		 * @param gap    gap between cells.
 		 * @return canvas position as float array.
 		 */
@@ -322,7 +346,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Get the row and column of the given Index in the given field.
-		 * @param index 
+		 * @param index of a position in the game field.
 		 * @return array of coords.
 		 */
 		private int[] translateIndex(Game game, int index) throws ArrayIndexOutOfBoundsException
@@ -342,6 +366,131 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 	}
 
 
+	/**
+	 * Class CustomScollView.
+	 * Nesting of horizontal and vertical scroll with custom MotionEvent handling.
+	 */
+	private static class CustomScollView extends HorizontalScrollView
+	{
+		private ScrollView innerScroll;;
+
+		private float x;
+		private float y;
+
+		/**
+		 * Initiate a new CustomScollView.
+		 * @param context
+		 * @throws NullPointerException
+		 */
+		private CustomScollView(Context context) throws NullPointerException
+		{
+			super(context);
+
+			this.innerScroll = new ScrollView(context)
+			{
+				@Override
+				public boolean onTouchEvent(MotionEvent e)
+				{
+					return CustomScollView.this.onTouchEvent(e);
+				}
+			};
+
+			if (this.innerScroll == null)
+			{
+				throw new NullPointerException("No vertical scroll");
+			}
+
+			super.addView(this.innerScroll);
+		}
+
+
+		/**
+		 * Initiate a new CustomScollView.
+		 * @param context
+		 * @param child
+		 * @throws NullPointerException
+		 */
+		public CustomScollView(Context context, View child) throws NullPointerException
+		{
+			this(context);
+			//this.innerScroll.addView(child);
+			this.addView(child);
+
+			if (child == null || context == null)
+			{
+				throw new NullPointerException();
+			}
+		}
+
+
+		@Override
+		public boolean onTouchEvent(MotionEvent e)
+		{
+			if (e==null)
+			{
+				return true;
+			}
+
+			/*local x,y coordinates.*/
+			float x = e.getX();
+			float y = e.getY();
+
+			int action = e.getAction();
+
+			/*Scroll if its moving.*/
+			if (action == MotionEvent.ACTION_MOVE)
+			{
+				double[] off = new double[]{this.x - x, this.y -y};
+
+				this.scrollBy((int) off[0], (int) off[1]);
+				this.innerScroll.scrollBy((int) off[0], (int) off[1]);
+			}
+
+			/*Store current Position if pointer is still down.*/
+			if (true || (action&MotionEvent.ACTION_DOWN) == MotionEvent.ACTION_DOWN)
+			{
+				this.x = x;
+				this.y = y;
+			}
+
+			return true;
+		}
+
+
+		@Override
+		public void addView(View child, int index, ViewGroup.LayoutParams params)
+		{
+			if (child == null || child.equals(this.innerScroll))
+			{
+				super.addView(this.innerScroll, index, params);
+				return;
+			}
+			this.innerScroll.addView(child, index, params);
+		}
+
+
+		@Override
+		public void addView(View child, ViewGroup.LayoutParams params)
+		{
+			this.addView(child, 0, params);
+		}
+
+
+		@Override
+		public void addView(View child, int index)
+		{
+			this.addView(child, index, this.generateDefaultLayoutParams());
+		}
+
+
+		@Override
+		public void addView(View child)
+		{
+			this.addView(child, 0);
+		}
+	}
+
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -357,7 +506,9 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		this.gameView = new GameView(this);
 		this.gameView.invalidate();
-		layout.addView(this.gameView,
+
+		/*Custom scroll views for horizontal and vertical scrolling.*/
+		layout.addView(new CustomScollView(this, this.gameView),
 				new LinearLayout.LayoutParams(
 					LayoutParams.FILL_PARENT, // width
 					LayoutParams.FILL_PARENT, // height
