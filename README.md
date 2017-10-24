@@ -11,6 +11,7 @@ Small Minesweeper Project with GUI and a Solver (wip).
 
 ## Compiling Desktop GUI
 This will create class files in /tmp/Minesweeper
+
 In main directory run for building:
 ```
 make build
