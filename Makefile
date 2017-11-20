@@ -4,7 +4,8 @@ PACKAGE = nox/minesweeper
 
 # files and directories.
 MAIN    = nox.minesweeper.desktop.Minesweeper
-SRC     = src
+RES     = src/main/res
+SRC     = src/main/java
 LOGIC   = $(SRC)/$(PACKAGE)/logic
 TESTS   = $(SRC)/$(PACKAGE)/tests
 DESKTOP = $(SRC)/$(PACKAGE)/desktop
@@ -31,7 +32,7 @@ run: desktop
 
 
 android-install: $(APK)
-	@adb devices && adb install -r $(APK)
+	@gradle installDebug
 
 
 run-jar: $(BIN)/$(PROJECT).jar $(CLASSES)/$(LABELS)
@@ -47,8 +48,8 @@ test: tests
 # Build
 #
 android: $(APK)
-$(APK): $(CLASSES)/$(PACKAGE)/logic/*.class $(ANDROID) res/*/*
-	@ant debug
+$(APK): $(CLASSES)/$(PACKAGE)/logic/*.class $(ANDROID) $(RES)
+	@gradle assembleDebug
 
 
 desktop: $(CLASSES)/$(PACKAGE)/desktop/*.class
@@ -86,4 +87,5 @@ $(CLASSES)/$(LABELS): $(CLASSES) $(LABELS)
 # Clean
 #
 clean:
-	@ant clean
+	@gradle clean
+	@rm -vrf $(CLASSES)

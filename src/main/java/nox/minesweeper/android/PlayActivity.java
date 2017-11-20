@@ -40,6 +40,8 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 	private Dialog   restartGame;
 
+	private CustomScollView scroller;
+
 
 	/**
 	 * Class GameView.
@@ -185,24 +187,27 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			{
 				this.aimedPos.clear();
 
-				return false;
+				return true; // consumed
 			}
 
 			float x,y;
-			int action, pointer, cell;
+			int action, pointer, cell, aimed;
 			Game game;
+			boolean scrolling;
 
 			game = PlayActivity.this.game;
+			scrolling = true;
 
 			/*Start a new game option, else nothing to do?*/
 			if (game.field.isLost() || game.field.isWon())
 			{
 				PlayActivity.this.getRestartDialog().show();
-				return true;
+				return true; // game is done, maybe scrolling.
 			}
 
 			action  = e.getAction();
 			pointer = action >> MotionEvent.ACTION_POINTER_ID_SHIFT;
+			action  = action & MotionEvent.ACTION_MASK;
 
 			x    = e.getX(pointer);
 			y    = e.getY(pointer);
@@ -211,74 +216,74 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			/*Invalid position; event consumed.*/
 			if (cell < 0)
 			{
+				return false; // invalid position, but maybe scrolling.
+			}
+
+			/*Start: Aim for certain pointer selected.*/
+			if (this.isActionDown(action))
+			{
+				while (this.aimedPos.size()<=pointer)
+				{
+					this.aimedPos.add(-1);
+				}
+
+				this.aimedPos.set(pointer, cell);
+				Toast.makeText(this.getContext(), System.currentTimeMillis()+": Aim "+cell+"!", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+			/*Aim for certain pointer changed => Scrolled view.*/
+			if (cell != this.aimedPos.get(pointer)) // aim changed => scrolling
+			{
+				Toast.makeText(this.getContext(), "Changed. Scroll!", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+			/*End: Toggle mark or open aimed position.*/
+			if (this.isActionUp(action))
+			{
+				cell = this.aimedPos.remove(pointer);
+
+				if (this.isToggleMarkEvent(e)) // toggle
+				{
+					game.toggleMark(cell);
+				}
+				else // open
+				{
+					game.open(cell);
+				}
+
+				this.invalidate();
+				PlayActivity.this.showInfo();
+
 				return true;
 			}
 
-			/*Handle event actions.*/
-			switch (e.getActionMasked())
-			{
-				/* Initial meant position to edit.*/
-				case MotionEvent.ACTION_DOWN:
-				case MotionEvent.ACTION_POINTER_DOWN:
-
-					// add pseudo aims to override
-					while (this.aimedPos.size()<=pointer)
-					{
-						this.aimedPos.add(-1);
-					}
-
-					this.aimedPos.set(pointer, cell);
-
-					return false; // maybe scrolling => not consumed yet
+			return true;
+		}
 
 
-					/* Check if the pointer is still referring the aimed position.
-					 * If not, cancel the edit.*/
-				case MotionEvent.ACTION_MOVE:
-				case MotionEvent.ACTION_UP:
-				case MotionEvent.ACTION_POINTER_UP:
+		/**
+		 * Check if the MotionEvent action is down.
+		 * @param action MotionEvent action.
+		 * @return true, if action is down or pointer down.
+		 */
+		private boolean isActionDown(int action)
+		{
+			return action == MotionEvent.ACTION_DOWN
+				|| action == MotionEvent.ACTION_POINTER_DOWN;
+		}
 
-					/*Nothing aimed => Nothing to do.*/
-					if (this.aimedPos.isEmpty())
-					{
-						return true;
-					}
 
-					int aim;
-					aim  = this.aimedPos.remove(pointer);
-
-					/*Cancel, it's not the aimed position anymore.*/
-					if (cell < 0 || cell != aim)
-					{
-						return true;
-					}
-
-					/*Finish handling for move.*/
-					if (action == MotionEvent.ACTION_MOVE)
-					{
-						this.aimedPos.add(pointer, aim); // readd
-						return true;
-					}
-
-					if (this.isToggleMarkEvent(e)) // toggle
-					{
-						game.toggleMark(cell);
-					}
-					else // open
-					{
-						game.open(cell);
-					}
-
-					this.invalidate();
-					PlayActivity.this.showInfo();
-
-					return false; // maybe scrolling => not consumed yet
-
-				default:
-					break;
-			}
-
-			return false; // maybe scrolling => not consumed yet
+		/**
+		 * Check if the MotionEvent action is up.
+		 * @param action MotionEvent action.
+		 * @return true, if action is up or pointer up.
+		 */
+		private boolean isActionUp(int action)
+		{
+			return action == MotionEvent.ACTION_UP
+				|| action == MotionEvent.ACTION_POINTER_UP;
 		}
 
 
@@ -440,20 +445,32 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			/*Scroll if its moving.*/
 			if (action == MotionEvent.ACTION_MOVE)
 			{
-				double[] off = new double[]{this.x - x, this.y -y};
-
-				this.scrollBy((int) off[0], (int) off[1]);
-				this.innerScroll.scrollBy((int) off[0], (int) off[1]);
+				this.scrollBy(
+						(int) Math.round(this.x-x),
+						(int) Math.round(this.y-y));
 			}
 
 			/*Store current Position if pointer is still down.*/
-			if (true || (action&MotionEvent.ACTION_DOWN) == MotionEvent.ACTION_DOWN)
-			{
-				this.x = x;
-				this.y = y;
-			}
+			this.x = x;
+			this.y = y;
 
 			return true;
+		}
+
+
+		//@Override
+		//public void scrollTo(int x, int y)
+		//{
+			//super.scrollTo(x,y);
+			//this.innerScroll.scrollTo(x,y);
+		//}
+
+
+		@Override
+		public void scrollBy(int x, int y)
+		{
+			super.scrollBy(x,y);
+			this.innerScroll.scrollBy(x,y);
 		}
 
 
@@ -508,7 +525,8 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		this.gameView.invalidate();
 
 		/*Custom scroll views for horizontal and vertical scrolling.*/
-		layout.addView(new CustomScollView(this, this.gameView),
+		layout.addView(scroller = new CustomScollView(this, this.gameView),
+		//layout.addView(this.gameView,
 				new LinearLayout.LayoutParams(
 					LayoutParams.FILL_PARENT, // width
 					LayoutParams.FILL_PARENT, // height

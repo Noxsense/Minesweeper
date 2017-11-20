@@ -87,9 +87,15 @@ public class Statistic
 		long sum         = this.timeAverage*this.gamesWon;
 		this.timeAverage = (sum+time)/(this.gamesWon+=1);
 
+		//this.sum      += time; // what if time too long?
+		//this.gamesWon += 1;
+		//this.timeAverage = Math.round(sum / this.gamesWon);
+
+
 		this.timeBest = (time<this.timeBest) ? time : this.timeBest;
 		this.streak += 1;
 	}
+	//private long sum = 0;
 
 
 	/**

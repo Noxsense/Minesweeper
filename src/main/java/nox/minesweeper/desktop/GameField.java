@@ -40,6 +40,9 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 	private Graphics buffGraphics;
 	private Image    buffImage;
 
+	private int      seenFirstRow;
+	private int      seenFirstCol;
+
 	private Dimension paintedFieldSize;
 
 
@@ -235,6 +238,8 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 
+		this.showRoot();
+
 		Field.setDisplay0(' ');
 		this.setCellSize(30);
 		this.setCellGap(-1);
@@ -260,6 +265,7 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 	public void openGame(Game g)
 	{
 		this.game = g;
+		this.showRoot();
 	}
 
 
@@ -385,16 +391,23 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 		this.design.updateCellLabels();
 
 		int size = this.getCellSize();
+		int gap  = this.getCellGap();
 
 		for (int i=0; i<this.game.field.size(); i++)
 		{
+			Point p;
 			this.design.drawCell(buffGraphics,
-					this.index2Point(i),
+					p=this.index2Point(i),
 					size,
 					this.game.field.onPosition(i));
+			buffGraphics.setColor(Color.GREEN);
+			buffGraphics.drawString(""+i, p.x,p.y);
 		}
 
-		graphics.drawImage(this.buffImage,0,0, this);
+		graphics.drawImage(this.buffImage,
+				0,//this.seenFirstCol*(size+gap),
+				0,//this.seenFirstRow*(size+gap),
+				this);
 	}
 
 
@@ -482,9 +495,55 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 		int offset = this.getCellSize()+this.getCellGap();
 		int width  = this.game.field.getWidth();
 
-		return ((offset*width) < p.x)
+		int index = ((offset*(width-seenFirstCol)) < p.x)
 			? this.point2Index(null)
 			: (p.y/(offset)*width) + p.x/(offset);
+		System.out.println("Index: "+index);
+		return index;
+	}
+
+
+	/**
+	 * Reset the current View to the root.
+	 */
+	public void showRoot()
+	{
+		this.seenFirstRow = 0;
+		this.seenFirstCol = 0;
+	}
+
+
+	/**
+	 * Scroll horizontally some columns.
+	 * @param cols to skip
+	 */
+	public void scrollHorizontal(int cols)
+	{
+		/*There's nothing to scroll.*/
+		if (this.game == null)
+		{
+			return;
+		}
+
+		this.seenFirstCol = Math.max(0, seenFirstCol+cols);
+		this.seenFirstCol = Math.min(this.game.field.getWidth(), seenFirstCol+cols);
+	}
+
+
+	/**
+	 * Scroll vertically some rows.
+	 * @param rows to skip
+	 */
+	public void scrollVertical(int rows)
+	{
+		/*There's nothing to scroll.*/
+		if (this.game == null)
+		{
+			return;
+		}
+
+		this.seenFirstRow = Math.max(0, seenFirstRow+rows);
+		this.seenFirstRow = Math.min(this.game.field.getHeight(), seenFirstRow+rows);
 	}
 
 
@@ -523,9 +582,24 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 	@Override
 	public void mouseDragged(MouseEvent e)
 	{
-		Rectangle r = new Rectangle(e.getX(), e.getY(), 1,1);
-		System.out.println("Mouse Dragged");
-		//scrollRectToVisible(r);
+		if (this.game==null)
+			return;
+
+		int pos, difference, width, v, h;
+		pos        = this.point2Index(e.getPoint());
+		width      = this.game.field.getWidth();
+		difference = pos - this.aimedFieldPos;
+		
+		v = (difference)/width;
+		h = (difference)%width;
+
+		this.scrollVertical((difference)/width);
+		this.scrollHorizontal((difference)%width);
+		this.repaint();
+
+		this.aimedFieldPos = pos;
+
+		System.out.println("Mouse Dragged: Movement ("+v+","+h+")");
 	}
 
 

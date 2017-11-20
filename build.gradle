@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+		google()
+        jcenter()
+    }
+    dependencies {
+		classpath 'com.android.tools.build:gradle:3.0.0'
+    }
+} 
+
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.application'
+
+
+android {
+
+  compileSdkVersion 24
+  buildToolsVersion "27.0.1"
+
+  defaultConfig {
+    applicationId 'nox.minesweeper.android'
+    minSdkVersion 8
+    targetSdkVersion 24
+    versionCode 1
+    versionName "1.0"
+  }
+
+  buildTypes {
+    release {
+        minifyEnabled true // Enables code shrinking for the release build type.
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+
+		debug {
+			applicationIdSuffix ".debug"
+			versionNameSuffix "-debug"
+			minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+
+  sourceSets {
+      main {
+          java {
+              exclude '**/desktop/*'
+              exclude '**/tests/*'
+         }
+     }
+  }
+
+}
