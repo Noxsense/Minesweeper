@@ -400,8 +400,6 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 					p=this.index2Point(i),
 					size,
 					this.game.field.onPosition(i));
-			buffGraphics.setColor(Color.GREEN);
-			buffGraphics.drawString(""+i, p.x,p.y);
 		}
 
 		graphics.drawImage(this.buffImage,
@@ -498,7 +496,6 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 		int index = ((offset*(width-seenFirstCol)) < p.x)
 			? this.point2Index(null)
 			: (p.y/(offset)*width) + p.x/(offset);
-		System.out.println("Index: "+index);
 		return index;
 	}
 
@@ -599,7 +596,6 @@ class GameField extends Canvas implements MouseListener, MouseMotionListener
 
 		this.aimedFieldPos = pos;
 
-		System.out.println("Mouse Dragged: Movement ("+v+","+h+")");
 	}
 
 

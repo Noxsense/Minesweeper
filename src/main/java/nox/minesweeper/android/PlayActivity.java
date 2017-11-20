@@ -70,7 +70,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			this.setOnTouchListener(this);
 			this.aimedPos = new ArrayList<Integer>();
 
-			this.cellSize = 20;
+			this.cellSize = this.getCellSize();
 			this.cellGap  = GameView.STANDARD_GAP;
 
 			this.paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -257,6 +257,15 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			return true;
 		}
 
+
+		/**
+		 * Get the side (a*a) of the cell.
+		 * @return side as float.
+		 */
+		protected float getCellSize()
+		{
+			return 40;
+		}
 
 		/**
 		 * Check if the given mouse event was a toggle action.
