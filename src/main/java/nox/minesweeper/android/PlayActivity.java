@@ -14,11 +14,8 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.LinearLayout;
-import android.widget.HorizontalScrollView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,8 +36,6 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 	private Game     game;
 
 	private Dialog   restartGame;
-
-	private CustomScollView scroller;
 
 
 	/**
@@ -66,7 +61,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 		/**
 		 * Create a new Gameview.
 		 * Initate the colours and anything.
-		 * @param context
+		 * @param context 
 		 */
 		public GameView(Context context)
 		{
@@ -93,27 +88,6 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 				this.paintOpened[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
 				this.paintOpened[i].setARGB((31*i)%255, 255, 255, 255);
 			}
-		}
-
-
-		@Override
-		public void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-		{
-			Game game = PlayActivity.this.game;
-			if (game==null)
-			{
-				super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-				return;
-			}
-
-			double width, height, gap;
-			gap    = this.getCellGap();
-			width  = game.field.getWidth()*(this.cellSize+gap) - gap;
-			height = game.field.getHeight()*(this.cellSize+gap)- gap;
-
-			this.setMeasuredDimension(
-					(int)Math.round(width),
-					(int)Math.round(height));
 		}
 
 
@@ -187,27 +161,24 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			{
 				this.aimedPos.clear();
 
-				return true; // consumed
+				return false;
 			}
 
 			float x,y;
-			int action, pointer, cell, aimed;
+			int action, pointer, cell;
 			Game game;
-			boolean scrolling;
 
 			game = PlayActivity.this.game;
-			scrolling = true;
 
 			/*Start a new game option, else nothing to do?*/
 			if (game.field.isLost() || game.field.isWon())
 			{
 				PlayActivity.this.getRestartDialog().show();
-				return true; // game is done, maybe scrolling.
+				return true;
 			}
 
 			action  = e.getAction();
 			pointer = action >> MotionEvent.ACTION_POINTER_ID_SHIFT;
-			action  = action & MotionEvent.ACTION_MASK;
 
 			x    = e.getX(pointer);
 			y    = e.getY(pointer);
@@ -216,74 +187,74 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 			/*Invalid position; event consumed.*/
 			if (cell < 0)
 			{
-				return false; // invalid position, but maybe scrolling.
-			}
-
-			/*Start: Aim for certain pointer selected.*/
-			if (this.isActionDown(action))
-			{
-				while (this.aimedPos.size()<=pointer)
-				{
-					this.aimedPos.add(-1);
-				}
-
-				this.aimedPos.set(pointer, cell);
-				Toast.makeText(this.getContext(), System.currentTimeMillis()+": Aim "+cell+"!", Toast.LENGTH_SHORT).show();
-				return false;
-			}
-
-			/*Aim for certain pointer changed => Scrolled view.*/
-			if (cell != this.aimedPos.get(pointer)) // aim changed => scrolling
-			{
-				Toast.makeText(this.getContext(), "Changed. Scroll!", Toast.LENGTH_SHORT).show();
-				return false;
-			}
-
-			/*End: Toggle mark or open aimed position.*/
-			if (this.isActionUp(action))
-			{
-				cell = this.aimedPos.remove(pointer);
-
-				if (this.isToggleMarkEvent(e)) // toggle
-				{
-					game.toggleMark(cell);
-				}
-				else // open
-				{
-					game.open(cell);
-				}
-
-				this.invalidate();
-				PlayActivity.this.showInfo();
-
 				return true;
 			}
 
+			/*Handle event actions.*/
+			switch (e.getActionMasked())
+			{
+				/* Initial meant position to edit.*/
+				case MotionEvent.ACTION_DOWN:
+				case MotionEvent.ACTION_POINTER_DOWN:
+
+					// add pseudo aims to override
+					while (this.aimedPos.size()<=pointer)
+					{
+						this.aimedPos.add(-1);
+					}
+
+					this.aimedPos.set(pointer, cell);
+
+					return true;
+
+
+					/* Check if the pointer is still referring the aimed position.
+					 * If not, cancel the edit.*/
+				case MotionEvent.ACTION_MOVE:
+				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_POINTER_UP:
+
+					/*Nothing aimed => Nothing to do.*/
+					if (this.aimedPos.isEmpty())
+					{
+						return true;
+					}
+
+					int aim;
+					aim  = this.aimedPos.remove(pointer);
+
+					/*Cancel, it's not the aimed position anymore.*/
+					if (cell < 0 || cell != aim)
+					{
+						return true;
+					}
+
+					/*Finish handling for move.*/
+					if (action == MotionEvent.ACTION_MOVE)
+					{
+						this.aimedPos.add(pointer, aim); // readd
+						return true;
+					}
+
+					if (this.isToggleMarkEvent(e)) // toggle
+					{
+						game.toggleMark(cell);
+					}
+					else // open
+					{
+						game.open(cell);
+					}
+
+					this.invalidate();
+					PlayActivity.this.showInfo();
+
+					return true;
+
+				default:
+					break;
+			}
+
 			return true;
-		}
-
-
-		/**
-		 * Check if the MotionEvent action is down.
-		 * @param action MotionEvent action.
-		 * @return true, if action is down or pointer down.
-		 */
-		private boolean isActionDown(int action)
-		{
-			return action == MotionEvent.ACTION_DOWN
-				|| action == MotionEvent.ACTION_POINTER_DOWN;
-		}
-
-
-		/**
-		 * Check if the MotionEvent action is up.
-		 * @param action MotionEvent action.
-		 * @return true, if action is up or pointer up.
-		 */
-		private boolean isActionUp(int action)
-		{
-			return action == MotionEvent.ACTION_UP
-				|| action == MotionEvent.ACTION_POINTER_UP;
 		}
 
 
@@ -301,7 +272,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Get the gap between cells.
-		 * @return the gap between cells
+		 * @return 
 		 */
 		private float getCellGap()
 		{
@@ -311,7 +282,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Translate the given field coordinates to a canvas position.
-		 * @param coords cooridinates to translate.
+		 * @param coords cooridinates to translate. 
 		 * @param gap    gap between cells.
 		 * @return canvas position as float array.
 		 */
@@ -351,7 +322,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		/**
 		 * Get the row and column of the given Index in the given field.
-		 * @param index of a position in the game field.
+		 * @param index 
 		 * @return array of coords.
 		 */
 		private int[] translateIndex(Game game, int index) throws ArrayIndexOutOfBoundsException
@@ -371,143 +342,6 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 	}
 
 
-	/**
-	 * Class CustomScollView.
-	 * Nesting of horizontal and vertical scroll with custom MotionEvent handling.
-	 */
-	private static class CustomScollView extends HorizontalScrollView
-	{
-		private ScrollView innerScroll;;
-
-		private float x;
-		private float y;
-
-		/**
-		 * Initiate a new CustomScollView.
-		 * @param context
-		 * @throws NullPointerException
-		 */
-		private CustomScollView(Context context) throws NullPointerException
-		{
-			super(context);
-
-			this.innerScroll = new ScrollView(context)
-			{
-				@Override
-				public boolean onTouchEvent(MotionEvent e)
-				{
-					return CustomScollView.this.onTouchEvent(e);
-				}
-			};
-
-			if (this.innerScroll == null)
-			{
-				throw new NullPointerException("No vertical scroll");
-			}
-
-			super.addView(this.innerScroll);
-		}
-
-
-		/**
-		 * Initiate a new CustomScollView.
-		 * @param context
-		 * @param child
-		 * @throws NullPointerException
-		 */
-		public CustomScollView(Context context, View child) throws NullPointerException
-		{
-			this(context);
-			//this.innerScroll.addView(child);
-			this.addView(child);
-
-			if (child == null || context == null)
-			{
-				throw new NullPointerException();
-			}
-		}
-
-
-		@Override
-		public boolean onTouchEvent(MotionEvent e)
-		{
-			if (e==null)
-			{
-				return true;
-			}
-
-			/*local x,y coordinates.*/
-			float x = e.getX();
-			float y = e.getY();
-
-			int action = e.getAction();
-
-			/*Scroll if its moving.*/
-			if (action == MotionEvent.ACTION_MOVE)
-			{
-				this.scrollBy(
-						(int) Math.round(this.x-x),
-						(int) Math.round(this.y-y));
-			}
-
-			/*Store current Position if pointer is still down.*/
-			this.x = x;
-			this.y = y;
-
-			return true;
-		}
-
-
-		//@Override
-		//public void scrollTo(int x, int y)
-		//{
-			//super.scrollTo(x,y);
-			//this.innerScroll.scrollTo(x,y);
-		//}
-
-
-		@Override
-		public void scrollBy(int x, int y)
-		{
-			super.scrollBy(x,y);
-			this.innerScroll.scrollBy(x,y);
-		}
-
-
-		@Override
-		public void addView(View child, int index, ViewGroup.LayoutParams params)
-		{
-			if (child == null || child.equals(this.innerScroll))
-			{
-				super.addView(this.innerScroll, index, params);
-				return;
-			}
-			this.innerScroll.addView(child, index, params);
-		}
-
-
-		@Override
-		public void addView(View child, ViewGroup.LayoutParams params)
-		{
-			this.addView(child, 0, params);
-		}
-
-
-		@Override
-		public void addView(View child, int index)
-		{
-			this.addView(child, index, this.generateDefaultLayoutParams());
-		}
-
-
-		@Override
-		public void addView(View child)
-		{
-			this.addView(child, 0);
-		}
-	}
-
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -523,10 +357,7 @@ public class PlayActivity extends Activity implements DialogInterface.OnClickLis
 
 		this.gameView = new GameView(this);
 		this.gameView.invalidate();
-
-		/*Custom scroll views for horizontal and vertical scrolling.*/
-		layout.addView(scroller = new CustomScollView(this, this.gameView),
-		//layout.addView(this.gameView,
+		layout.addView(this.gameView,
 				new LinearLayout.LayoutParams(
 					LayoutParams.FILL_PARENT, // width
 					LayoutParams.FILL_PARENT, // height
