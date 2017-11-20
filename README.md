@@ -5,17 +5,19 @@ Small Minesweeper Project with GUI and a Solver (wip).
 ## Screenshots
 
 ### Desktop Version
-![Screenshot: Select Running Game](screenshots/Create_Or_Select.png)
-![Screenshot: Game](screenshots/Current_Game.png)
-![Screenshot: Statisitcs](screenshots/Statistics.png)
+[<img src="screenshots/Create_Or_Select.png" width="200">](screenshots/Create_Or_Select.png)
+[<img src="screenshots/Current_Game.png" width="200">](screenshots/Current_Game.png)
+[<img src="screenshots/Statistics.png" width="200">](screenshots/Statistics.png)
 
 ### Android Version
-![Android Screenshot: Select Running Game](screenshots/Android--Select_Game.png)
-![Android Screenshot: Game](screenshots/Android--Current_Game.png)
+[<img src="screenshots/Android--Select_Game.png" width="300">](artwork/screenshots/drawer.png)
+[<img src="screenshots/Android--Current_Game.png" width="300">](screenshots/Android--Current_Game.png)
 
 
-## Compiling Desktop GUI
-This will create class files in /tmp/Minesweeper
+## Compiling
+
+### Compiling Desktop GUI
+This will create class files in `bin/classes/Minesweeper`
 
 In main directory run for building:
 ```
@@ -27,30 +29,33 @@ and for running:
 make run
 ```
 
+### Compiling Android
+
+```
+gradle assembleDebug
+```
+
+or alternatively
+```
+make android
+```
+
+
 
 ## Directories:
 ```
 .
+├── build.gradle
 ├── Makefile
-├── AndroidManifest.xml
-├── ant.properties
-├── build.xml
-├── project.properties
-├── res
-├── screenshots
-├── src
-│   └── nox
-│       └── minesweeper
-│           ├── android
-│           │   └── ... GUI for Android
-│           ├── desktop
-|           |   ├── ... Main: Minesweeper
-│           │   └── ... GUI and Visible interpretations for the logic 
-│           ├── logic
-|           |   ├── ... Main: PlayGround
-│           │   └── ... *.java field, pausable game, statistics...
-│           └── tests
-|           |   ├── ... Main: MinesweeperTest
-│           │   └── ... *.java (using unittest)
-└── todo.txt
+└── src
+    └── main
+        ├── AndroidManifest.xml
+        ├── java
+        │   └── nox
+        │       └── minesweeper
+        │           ├── android
+        │           ├── desktop
+        │           ├── logic
+        │           └── tests
+        └── res
 ```
