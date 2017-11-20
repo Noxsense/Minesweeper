@@ -3,10 +3,15 @@
 Small Minesweeper Project with GUI and a Solver (wip).
 
 ## Screenshots
-![Screenshot: Home view](screenshots/Home.png)
+
+### Desktop Version
 ![Screenshot: Select Running Game](screenshots/Create_Or_Select.png)
 ![Screenshot: Game](screenshots/Current_Game.png)
 ![Screenshot: Statisitcs](screenshots/Statistics.png)
+
+### Android Version
+![Android Screenshot: Select Running Game](screenshots/Android--Select_Game.png)
+![Android Screenshot: Game](screenshots/Android--Current_Game.png)
 
 
 ## Compiling Desktop GUI
