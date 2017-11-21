@@ -1,0 +1,21 @@
+buildscript {
+	repositories {
+		google()
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:3.0.0'
+	}
+}
+
+allprojects {
+	group = 'nox.minesweeper'
+	version = '0.1.0'
+	repositories {
+		jcenter()
+	}
+}
+
+task clean(type: Delete) {
+	delete rootProject.buildDir
+}

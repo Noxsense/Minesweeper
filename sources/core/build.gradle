@@ -1,0 +1,25 @@
+
+apply plugin: 'java'
+
+sourceSets {
+//	  main {
+//	    java {
+//        srcDir 'src'
+//	    }
+//	  }
+	test {
+		java {
+			srcDir 'test'
+		}
+	}
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'nox.minesweeper.desktop.Minesweeper'
+  }
+}
+
+dependencies {
+	testCompile 'junit:junit:4.12'
+}
