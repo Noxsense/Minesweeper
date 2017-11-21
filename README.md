@@ -17,45 +17,43 @@ Small Minesweeper Project with GUI and a Solver (wip).
 ## Compiling
 
 ### Compiling Desktop GUI
-This will create class files in `bin/classes/Minesweeper`
+This will create a `core.jar` in `sources/build/libs`
 
-In main directory run for building:
+In  directory `sources` run for building:
 ```
-make build
-```
-
-and for running:
-```
-make run
+gradle :core:build
 ```
 
 ### Compiling Android
+
+In  directory `sources`:
 
 ```
 gradle assembleDebug
 ```
 
-or alternatively
-```
-make android
-```
-
-
 
 ## Directories:
 ```
 .
-├── build.gradle
-├── Makefile
-└── src
-    └── main
-        ├── AndroidManifest.xml
-        ├── java
-        │   └── nox
-        │       └── minesweeper
-        │           ├── android
-        │           ├── desktop
-        │           ├── logic
-        │           └── tests
-        └── res
+└── sources
+    ├── android
+    │   ├── src
+    │   │   └── main
+    │   │       ├── AndroidManifest.xml
+    │   │       ├── java
+    │   │       └── res
+    │   └── build.gradle
+    ├── core
+    │   ├── src
+    │   │   ├── main
+    │   │   │   └── java
+    │   │   │       └── nox
+    │   │   │           └── minesweeper
+    │   │   │               ├── desktop
+    │   │   │               └── logic
+    │   │   └── test
+    │   └── build.gradle
+    ├── build.gradle
+    └── settings.gradle
 ```
