@@ -23,7 +23,7 @@ public class Statistic
 	/**
 	 * Initate a new Statistic.
 	 * For a certain game.
-	 * @param game whose attributes will maintained.
+	 * @param g whose attributes will maintained.
 	 */
 	public Statistic(Game g) throws NullPointerException
 	{
@@ -50,7 +50,7 @@ public class Statistic
 
 	/**
 	 * Copy of the original.
-	 * @param original 
+	 * @param original original statistics which will be copied.
 	 */
 	protected Statistic(Statistic original)
 	{
@@ -244,8 +244,8 @@ public class Statistic
 	/**
 	 * Parse value for this stats from string.
 	 * @param info String which represents values for a certain game.
-	 * @throws NullPointerException 
-	 * @throws NumberFormatException 
+	 * @throws NullPointerException info is null or an empty string.
+	 * @throws NumberFormatException if numbers cannot be parsed.
 	 */
 	public void parseValues(String info) throws NullPointerException, NumberFormatException
 	{

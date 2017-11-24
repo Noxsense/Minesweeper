@@ -14,6 +14,15 @@ sourceSets {
 	}
 }
 
+javadoc {
+  source = sourceSets.main.allJava
+  classpath = configurations.compile
+  options.with {
+    links 'https://docs.oracle.com/javase/8/docs/api/'
+  }
+}
+
+
 jar {
   manifest {
     attributes 'Main-Class': 'nox.minesweeper.desktop.Minesweeper'

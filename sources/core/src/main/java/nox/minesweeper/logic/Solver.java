@@ -386,8 +386,11 @@ public enum Solver
 
 	/**
 	 * Get the indices of the positions which are unsatisfied, but open.
-	 * @param field 
-	 * @return 
+	 * It will return positions, whuch are open,
+	 * but their neighbours (marked|open) still doesn't fit
+	 * the requested mine number.
+	 * @param field Field which cells will be partially sorted.
+	 * @return positions indices as int array.
 	 */
 	public int[] possibleUnsatisfied(Field field)
 	{
@@ -427,8 +430,10 @@ public enum Solver
 	/**
 	 * Check if the Position is statisfied (all mines are marked).
 	 * Proxy for checkPosition(field,index,false).
-	 * @param field 
-	 * @param index 
+	 * @param field Field.
+	 * @param index index in field.
+	 * @throws NullPointerException if field is null.
+	 * @throws ArrayIndexOutOfBoundsException if index is not in field.
 	 */
 	public void checkPosition(Field field, int index) throws NullPointerException, ArrayIndexOutOfBoundsException
 	{
@@ -437,9 +442,11 @@ public enum Solver
 
 	/**
 	 * Check if the Position is statisfied (all mines are marked).
-	 * @param field 
-	 * @param index 
+	 * @param field Field which contains cells.
+	 * @param index index in field.
 	 * @param withTry will also check with combinatoric moves.
+	 * @throws NullPointerException if the field is null.
+	 * @throws ArrayIndexOutOfBoundsException if the position is not in field.
 	 */
 	public void checkPosition(Field field, int index, boolean withTry) throws NullPointerException, ArrayIndexOutOfBoundsException
 	{

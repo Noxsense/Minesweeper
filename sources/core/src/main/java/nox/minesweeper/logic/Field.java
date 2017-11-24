@@ -306,8 +306,8 @@ public class Field
 
 	/**
 	 * Initiate a new field for mines.
-	 * @param height 
-	 * @param width 
+	 * @param height height of field.
+	 * @param width  width of field.
 	 */
 	public Field(int height, int width)
 	throws ArrayIndexOutOfBoundsException
@@ -428,7 +428,7 @@ public class Field
 
 	/**
 	 * Toggles the mark of the given position.
-	 * @param p Position to open.
+	 * @param index index of Position to open.
 	 * @return true, if position is marked now.
 	 */
 	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
@@ -494,7 +494,7 @@ public class Field
 
 	/**
 	 * Opens given Position and maybe it's zero-neighbours.
-	 * @param p Position to open.
+	 * @param index index of Position to open.
 	 * @return array of newly opened positions (indices).
 	 */
 	public int[] open(int index) throws ArrayIndexOutOfBoundsException
@@ -569,7 +569,7 @@ public class Field
 	 * @param row row of position.
 	 * @param col column of position.
 	 * @return State (open, closed, marked)
-	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws ArrayIndexOutOfBoundsException if (row,col) leads to an invalid index.
 	 */
 	public State getState(int row, int col) throws ArrayIndexOutOfBoundsException
 	{
@@ -579,9 +579,9 @@ public class Field
 
 	/**
 	 * Get the state of the Position.
-	 * @param p requested Position's index.
+	 * @param index index of Position to open.
 	 * @return State (open, closed, marked)
-	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws ArrayIndexOutOfBoundsException if (row,col) leads to an invalid index.
 	 */
 	public State getState(int index) throws ArrayIndexOutOfBoundsException
 	{
@@ -594,7 +594,7 @@ public class Field
 	 * @param row row of position.
 	 * @param col column of position.
 	 * @return MAX VALUE (like a mine)  if the position is not opened yet, else the count of neighbours.
-	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws ArrayIndexOutOfBoundsException if (row,col) leads to an invalid index.
 	 */
 	public int onPosition(int row, int col) throws ArrayIndexOutOfBoundsException
 	{
@@ -604,9 +604,9 @@ public class Field
 
 	/**
 	 * Get the count of the neighbouring mines for the Position.
-	 * @param p requested Position's index.
+	 * @param index index of Position to open.
 	 * @return MAX VALUE (like a mine)  if the position is not opened yet, else the count of neighbours.
-	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws ArrayIndexOutOfBoundsException if (row,col) leads to an invalid index.
 	 */
 	public int onPosition(int index) throws ArrayIndexOutOfBoundsException
 	{
@@ -696,8 +696,8 @@ public class Field
 	 * Fill this field with mines.
 	 * This will clear the current state and set the given indeces as mines.
 	 * @param mineIndices positions for mines.
-	 * @throws ArrayIndexOutOfBoundsException 
-	 * @throws NullPointerException 
+	 * @throws ArrayIndexOutOfBoundsException if there are to many mines (more than could fit).
+	 * @throws NullPointerException if the mine indices are null.
 	 */
 	public void fillMines(int[] mineIndices) throws ArrayIndexOutOfBoundsException, NullPointerException
 	{
@@ -846,7 +846,7 @@ public class Field
 
 	/**
 	 * Get a copy of the positions states.
-	 * @return 
+	 * @return array with all positions' state (OPEN|MARKED|CLOSED).
 	 */
 	protected State[] getStates()
 	{

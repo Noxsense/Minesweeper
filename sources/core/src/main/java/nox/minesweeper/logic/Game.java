@@ -36,10 +36,10 @@ public class Game
 
 	/**
 	 * Initate a new Game with the given attributes.
-	 * @param width 
-	 * @param height 
-	 * @param mines 
-	 * @throws ArrayIndexOutOfBoundsException 
+	 * @param width initiate with Field.width.
+	 * @param height initiate with Field.height.
+	 * @param mines initial mines of the Game.
+	 * @throws ArrayIndexOutOfBoundsException if there are too many (cannot be filled).
 	 */
 	public Game(int height, int width, int mines) throws ArrayIndexOutOfBoundsException
 	{
@@ -49,9 +49,9 @@ public class Game
 
 	/**
 	 * Initate a new Game with the given attributes.
-	 * @param field
-	 * @param mines 
-	 * @throws ArrayIndexOutOfBoundsException 
+	 * @param field Base field of the Game.
+	 * @param mines initial mines of the Game.
+	 * @throws ArrayIndexOutOfBoundsException if there are too many (cannot be filled).
 	 */
 	public Game(Field field, int mines) throws NullPointerException, ArrayIndexOutOfBoundsException
 	{
@@ -105,7 +105,7 @@ public class Game
 	 * Proxy and handler for this.field.open(index).
 	 * @param index  which should be opened.
 	 * @return ALL opened indices.
-	 * @throws ArrayIndexOutOfBoundsException 
+	 * @throws ArrayIndexOutOfBoundsException  thrown by field.open()
 	 */
 	public int[] open(int index) throws ArrayIndexOutOfBoundsException
 	{
@@ -201,7 +201,7 @@ public class Game
 	 * Shortcut for this.field.toggleMark(index).
 	 * @param index index which should be marked (or not).
 	 * @return true, if the index is marked, false if just closed.
-	 * @throws ArrayIndexOutOfBoundsException 
+	 * @throws ArrayIndexOutOfBoundsException  thrown by field.toggleMark()
 	 */
 	public boolean toggleMark(int index) throws ArrayIndexOutOfBoundsException
 	{
@@ -376,8 +376,8 @@ public class Game
 
 	/**
 	 * Compare this dimensions with other dimensions.
-	 * @param g 
-	 * @return 
+	 * @param g other Game to compare with.
+	 * @return true, if height, width and mines are equal.
 	 */
 	public boolean equals(Game g)
 	{
@@ -390,10 +390,10 @@ public class Game
 
 	/**
 	 * Compare with dimensions.
-	 * @param height 
-	 * @param width 
-	 * @param mines 
-	 * @return 
+	 * @param height check, if Game.height == height.
+	 * @param width check, if Game.width == width.
+	 * @param mines check, if Game.mines == mines.
+	 * @return true, if the attributes are equal.
 	 */
 	public boolean hasAttributes(int height, int width, int mines)
 	{

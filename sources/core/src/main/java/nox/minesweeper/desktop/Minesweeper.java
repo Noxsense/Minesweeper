@@ -77,8 +77,8 @@ public class Minesweeper extends JFrame implements ActionListener
 	/**
 	 * Start Minesweeper.
 	 * Create a frame where minesweeper could be played with a (maybe usable) gui.
-	 * @param width 
-	 * @param height 
+	 * @param width  field width.
+	 * @param height field height.
 	 */
 	public Minesweeper(int width, int height)
 	{
