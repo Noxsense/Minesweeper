@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Minesweeper</string>
+	<string name="about">Created by Nox</string>
+
+	<string name="accept">Accept</string>
+	<string name="cancel">Abort</string>
+
+	<string name="WON">Game is WON!</string>
+	<string name="LOST">Game is Lost!</string>
+
+	<string name="new_game">Create new Game</string>
+	<string name="recent_game">Recent Game</string>
+	<string name="statistics">Statistics</string>
+
+	<string name="select_game">Select a Game</string>
+	<string name="custom_game">Create a custom Game</string>
+
+	<string name="restart_game">Restart the current Game</string>
+	<string name="restart_game_warning"></string>
+
+	<string name="reset_stats">Reset the Statitstics of this Game.</string>
+	<string name="reset_stats_warning">Lost and won games, best and average time and also streak will be gone.</string>
+
+	<string name="current_game_time">Time %1$.2f s</string>
+	<string name="current_game_info">Cells %1$d/%2$d, Mines: %3$d/%4$d</string>
+
+</resources>

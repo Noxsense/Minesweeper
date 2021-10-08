@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	>
+	<TextView
+		android:text="@string/app_name"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		/>
+	<Button
+		android:id="@+id/btn_new_game"
+		android:text="@string/new_game"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		/>
+	<Button
+		android:id="@+id/btn_recent_game"
+		android:text="@string/recent_game"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		/>
+	<Button
+		android:id="@+id/btn_statistics"
+		android:text="@string/statistics"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		/>
+</LinearLayout>
